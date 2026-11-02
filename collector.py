@@ -62,7 +62,7 @@ def main():
     # lastTrade refers to the underlying, not the option chain's as-of time.
     # Accept date-only labels for diagnostic metadata, never as EOD proof.
     quote_date, quote_time, quote_precision = None, None, "unavailable"
-    match = re.search(r"AS OF\\s+([A-Z]{3})\\s+(\\d{1,2}),\\s+(\\d{4})(?:\\s+(\\d{1,2}):(\\d{2})\\s+(AM|PM)\\s+ET)?", stamp if isinstance(stamp, str) else "", re.I)
+    match = re.search(r"AS OF\s+([A-Z]{3})\s+(\d{1,2}),\s+(\d{4})(?:\s+(\d{1,2}):(\d{2})\s+(AM|PM)\s+ET)?", stamp if isinstance(stamp, str) else "", re.I)
     if match:
         try:
             quote_date = datetime.strptime(" ".join(match.group(i) for i in (1, 2, 3)), "%b %d %Y").date().isoformat()
