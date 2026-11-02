@@ -1,0 +1,36 @@
+name: SPY Nasdaq options experimental EOD
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 21 * * 1-5'
+    - cron: '17 22 * * 1-5'
+permissions:
+  contents: read
+concurrency:
+  group: spy-options-experimental
+  cancel-in-progress: false
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Collect at 17:17 New York time only (DST aware)
+        shell: bash
+        run: |
+          if [ "$(TZ=America/New_York date +%H)" != "17" ]; then
+            echo "Not the 17:00 ET hour; skipping alternate UTC cron."
+            exit 0
+          fi
+          python collector.py
+      - name: Upload experimental summary and contract CSV
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: spy-options-${{ github.run_id }}
+          path: output/
+          if-no-files-found: ignore
+          retention-days: 30
