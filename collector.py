@@ -77,6 +77,32 @@ def main():
         print("Timestamp diagnostic: lastTrade=" + repr(stamp)[:500], file=sys.stderr)
     missing = {f: sum(c[f] is None for c in contracts) for f in FIELDS}
     totals = {f: sum(c[f] for c in contracts if c[f] is not None) for f in FIELDS}
+    # Data-quality audit only; missing is never converted to zero.
+    root_quality = {}
+    for root in sorted(set(c["root"] for c in contracts)):
+        subset = [c for c in contracts if c["root"] == root]
+        root_quality[root] = {
+            "contract_rows": len(subset),
+            "expiry_count": len(set(c["expiry"] for c in subset)),
+            "fields": {
+                field: {
+                    "missing": sum(c[field] is None for c in subset),
+                    "zero": sum(c[field] == 0 for c in subset),
+                    "positive": sum(c[field] is not None and c[field] > 0 for c in subset),
+                } for field in FIELDS
+            },
+        }
+    # An adjusted option root is not fungible with standard SPY contracts.
+    standard = [c for c in contracts if c["root"] == "SPY"]
+    standard_totals = {f: sum(c[f] for c in standard if c[f] is not None) for f in FIELDS}
+    standard_missing = {f: sum(c[f] is None for c in standard) for f in FIELDS}
+    standard_expiry_quality = {}
+    for expiry in sorted(set(c["expiry"] for c in standard)):
+        subset = [c for c in standard if c["expiry"] == expiry]
+        standard_expiry_quality[expiry] = {
+            "contract_rows": len(subset),
+            "missing_fields": {f: sum(c[f] is None for c in subset) for f in FIELDS},
+        }
     summary = {
         "source": URL, "snapshot_date_et": now.date().isoformat(),
         "fetched_at_et": now.isoformat(), "nasdaq_last_trade": stamp,
@@ -91,6 +117,11 @@ def main():
         "expiry_count": len(set(c["expiry"] for c in contracts)),
         "roots": dict(Counter(c["root"] for c in contracts)),
         "missing_fields": missing, "observed_totals_excluding_missing": totals,
+        "root_quality": root_quality,
+        "standard_spy_missing_fields": standard_missing,
+        "standard_spy_observed_totals_excluding_missing": standard_totals,
+        "standard_spy_expiry_quality": standard_expiry_quality,
+        "missing_values_treated_as_zero": False,
         "raw_sha256": hashlib.sha256(raw).hexdigest(),
         "status": "UNVERIFIED",
         "status_reason": "Option-chain EOD as-of timestamp not independently established; underlying lastTrade is insufficient",
