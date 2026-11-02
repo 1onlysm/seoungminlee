@@ -32,7 +32,7 @@ def parse(payload):
             continue
         if not expiry or not row.get("strike"):
             raise ValueError("unrecognized row")
-        match = re.search(r"/([a-z0-9]+)-+\\d{6}c\\d+", row.get("drillDownURL") or "", re.I)
+        match = re.search(r"/([a-z0-9]+)-+\d{6}c\d+", row.get("drillDownURL") or "", re.I)
         if not match:
             raise ValueError("unknown contract root")
         root, strike = match.group(1).upper(), str(row["strike"])
@@ -59,7 +59,7 @@ def main():
         raise ValueError("oversized response")
     data, contracts = parse(json.loads(raw))
     stamp = data.get("lastTrade", "")
-    m = re.search(r"AS OF\\s+([A-Z]{3})\\s+(\\d{1,2}),\\s+(\\d{4})\\s+(\\d{1,2}):(\\d{2})\\s+(AM|PM)\\s+ET", stamp, re.I)
+    m = re.search(r"AS OF\s+([A-Z]{3})\s+(\d{1,2}),\s+(\d{4})\s+(\d{1,2}):(\d{2})\s+(AM|PM)\s+ET", stamp, re.I)
     if not m:
         raise ValueError("timestamp unavailable")
     quoted = datetime.strptime(" ".join(m.groups()), "%b %d %Y %I %M %p").replace(tzinfo=ET)
