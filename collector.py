@@ -46,6 +46,78 @@ def parse(payload):
         out.append(record)
     return data, out
 
+def experimental_metrics(contracts):
+    """Observed-only option metrics; never interpret missing OI/volume as zero."""
+    from collections import defaultdict
+    from decimal import Decimal, InvalidOperation
+
+    standard = [c for c in contracts if c["root"] == "SPY"]
+    results = {}
+    for expiry in sorted(set(c["expiry"] for c in standard)):
+        subset = [c for c in standard if c["expiry"] == expiry]
+        by_strike = defaultdict(lambda: {"call_oi": None, "put_oi": None})
+        valid = []
+        for c in subset:
+            try:
+                strike = Decimal(c["strike"].replace(",", "").replace("$", ""))
+                if not strike.is_finite() or strike <= 0:
+                    raise InvalidOperation
+            except (InvalidOperation, ValueError):
+                raise ValueError("invalid strike in metric engine")
+            valid.append((strike, c))
+            by_strike[strike] = {"call_oi": c["c_Openinterest"], "put_oi": c["p_Openinterest"]}
+        fields = {
+            f: {"observed": sum(c[f] for _, c in valid if c[f] is not None),
+                "missing": sum(c[f] is None for _, c in valid)}
+            for f in FIELDS
+        }
+        def ratio(put_field, call_field):
+            p, q = fields[put_field], fields[call_field]
+            return round(p["observed"] / q["observed"], 6) if q["observed"] > 0 else None
+        def wall(field):
+            known = [(strike, d[field]) for strike, d in by_strike.items() if d[field] is not None]
+            if not known:
+                return None
+            maximum = max(v for _, v in known)
+            return {"strikes": [str(k) for k, v in sorted(known) if v == maximum],
+                    "observed_oi": maximum, "provisional": True}
+        call_total, put_total = fields["c_Openinterest"]["observed"], fields["p_Openinterest"]["observed"]
+        all_oi_present = fields["c_Openinterest"]["missing"] == 0 and fields["p_Openinterest"]["missing"] == 0
+        # Standard expiration intrinsic-value payout across observed strikes.
+        # Missing OI means the true minimum cannot be established.
+        pain = None
+        if all_oi_present and by_strike:
+            payouts = {}
+            for candidate in sorted(by_strike):
+                payouts[candidate] = sum(
+                    max(Decimal(0), candidate - strike) * Decimal(d["put_oi"]) +
+                    max(Decimal(0), strike - candidate) * Decimal(d["call_oi"])
+                    for strike, d in by_strike.items()
+                )
+            lowest = min(payouts.values())
+            pain = {"strikes": [str(k) for k, v in payouts.items() if v == lowest],
+                    "min_intrinsic_payout": str(lowest),
+                    "status": "CALCULATED_FROM_COMPLETE_OBSERVED_OI_NOT_EOD_VERIFIED"}
+        results[expiry] = {
+            "contract_rows": len(subset), "observed_fields": fields,
+            "put_call_volume_ratio_observed_only": ratio("p_Volume", "c_Volume"),
+            "put_call_oi_ratio_observed_only": ratio("p_Openinterest", "c_Openinterest"),
+            "call_oi_wall_observed_only": wall("call_oi"),
+            "put_oi_wall_observed_only": wall("put_oi"),
+            "call_top_strike_oi_share_observed_only": (
+                round(max((v["call_oi"] or 0) for v in by_strike.values()) / call_total, 6)
+                if call_total else None),
+            "put_top_strike_oi_share_observed_only": (
+                round(max((v["put_oi"] or 0) for v in by_strike.values()) / put_total, 6)
+                if put_total else None),
+            "max_pain": pain,
+            "max_pain_suppressed_reason": None if pain else "MISSING_OI_OR_NO_STRIKES",
+            "data_status": "UNVERIFIED", "approved_for_navi": False,
+        }
+    return {"status": "EXPERIMENTAL_UNVERIFIED", "approved_for_navi": False,
+            "root_filter": "SPY_ONLY_EXCLUDES_ADJUSTED_ROOTS",
+            "missing_is_not_zero": True, "expiry_metrics": results}
+
 def main():
     now = datetime.now(ET)
     if now.weekday() >= 5 or not (16 <= now.hour <= 23) or (now.hour == 16 and now.minute < 30):
@@ -134,6 +206,13 @@ def main():
         writer = csv.DictWriter(file, fieldnames=["root", "expiry", "strike", *FIELDS])
         writer.writeheader()
         writer.writerows(contracts)
+    metrics = experimental_metrics(contracts)
+    (dest / "experimental_metrics.json").write_text(json.dumps(metrics, indent=2) + "\\n")
+    print("EXPERIMENTAL METRICS: " + json.dumps({
+        "expiry_count": len(metrics["expiry_metrics"]),
+        "max_pain_computed": sum(v["max_pain"] is not None for v in metrics["expiry_metrics"].values()),
+        "status": metrics["status"], "approved_for_navi": False
+    }))
     # Raw JSON is intentionally not published to artifacts in this PUBLIC repo.
     print(json.dumps(summary, indent=2))
 
