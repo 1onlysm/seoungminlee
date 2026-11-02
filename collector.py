@@ -61,7 +61,10 @@ def main():
     stamp = data.get("lastTrade", "")
     m = re.search(r"AS OF\s+([A-Z]{3})\s+(\d{1,2}),\s+(\d{4})\s+(\d{1,2}):(\d{2})\s+(AM|PM)\s+ET", stamp, re.I)
     if not m:
-        raise ValueError("timestamp unavailable")
+        # Diagnostic only: preserve the strict EOD gate; never infer a missing time.
+        print("EOD timestamp diagnostic: lastTrade=" + repr(stamp)[:500], file=sys.stderr)
+        print("EOD timestamp diagnostic: data keys=" + repr(sorted(data.keys())), file=sys.stderr)
+        raise ValueError("timestamp unavailable; EOD not verified")
     quoted = datetime.strptime(" ".join(m.groups()), "%b %d %Y %I %M %p").replace(tzinfo=ET)
     if quoted.date() != now.date() or quoted.hour < 16:
         raise ValueError("stale or intraday quote; EOD not verified")
