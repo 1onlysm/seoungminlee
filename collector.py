@@ -59,29 +59,44 @@ def main():
         raise ValueError("oversized response")
     data, contracts = parse(json.loads(raw))
     stamp = data.get("lastTrade", "")
-    m = re.search(r"AS OF\s+([A-Z]{3})\s+(\d{1,2}),\s+(\d{4})\s+(\d{1,2}):(\d{2})\s+(AM|PM)\s+ET", stamp, re.I)
-    if not m:
-        # Diagnostic only: preserve the strict EOD gate; never infer a missing time.
-        print("EOD timestamp diagnostic: lastTrade=" + repr(stamp)[:500], file=sys.stderr)
-        print("EOD timestamp diagnostic: data keys=" + repr(sorted(data.keys())), file=sys.stderr)
-        raise ValueError("timestamp unavailable; EOD not verified")
-    quoted = datetime.strptime(" ".join(m.groups()), "%b %d %Y %I %M %p").replace(tzinfo=ET)
-    if quoted.date() != now.date() or quoted.hour < 16:
-        raise ValueError("stale or intraday quote; EOD not verified")
+    # lastTrade refers to the underlying, not the option chain's as-of time.
+    # Accept date-only labels for diagnostic metadata, never as EOD proof.
+    quote_date, quote_time, quote_precision = None, None, "unavailable"
+    match = re.search(r"AS OF\\s+([A-Z]{3})\\s+(\\d{1,2}),\\s+(\\d{4})(?:\\s+(\\d{1,2}):(\\d{2})\\s+(AM|PM)\\s+ET)?", stamp if isinstance(stamp, str) else "", re.I)
+    if match:
+        try:
+            quote_date = datetime.strptime(" ".join(match.group(i) for i in (1, 2, 3)), "%b %d %Y").date().isoformat()
+            if match.group(4):
+                quote_time = datetime.strptime(f"{match.group(4)}:{match.group(5)} {match.group(6)}", "%I:%M %p").time().isoformat(timespec="minutes")
+                quote_precision = "dated_time_et"
+            else:
+                quote_precision = "date_only"
+        except ValueError:
+            quote_date, quote_time, quote_precision = None, None, "unavailable"
+    if quote_date is None:
+        print("Timestamp diagnostic: lastTrade=" + repr(stamp)[:500], file=sys.stderr)
     missing = {f: sum(c[f] is None for c in contracts) for f in FIELDS}
     totals = {f: sum(c[f] for c in contracts if c[f] is not None) for f in FIELDS}
     summary = {
-        "source": URL, "data_date_et": quoted.date().isoformat(),
+        "source": URL, "snapshot_date_et": now.date().isoformat(),
         "fetched_at_et": now.isoformat(), "nasdaq_last_trade": stamp,
+        "underlying_last_trade_date_et": quote_date,
+        "underlying_last_trade_time_et": quote_time,
+        "underlying_timestamp_precision": quote_precision,
+        "underlying_date_matches_fetch_date": (quote_date == now.date().isoformat()) if quote_date else None,
+        "option_chain_as_of_et": None,
+        "option_chain_freshness_evidence": "NOT_AVAILABLE",
+        "volume_as_of_et": None, "open_interest_as_of_et": None,
         "reported_rows": len((data["table"])["rows"]), "contract_rows": len(contracts),
         "expiry_count": len(set(c["expiry"] for c in contracts)),
         "roots": dict(Counter(c["root"] for c in contracts)),
         "missing_fields": missing, "observed_totals_excluding_missing": totals,
         "raw_sha256": hashlib.sha256(raw).hexdigest(),
-        "status": "EXPERIMENTAL_POST_CLOSE_UNVERIFIED",
+        "status": "UNVERIFIED",
+        "status_reason": "Option-chain EOD as-of timestamp not independently established; underlying lastTrade is insufficient",
         "approved_for_navi": False,
     }
-    dest = Path("output") / quoted.date().isoformat()
+    dest = Path("output") / now.strftime("%Y-%m-%dT%H%M%S%f_ET")
     dest.mkdir(parents=True, exist_ok=False)
     (dest / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")
     with (dest / "contracts.csv").open("w", newline="") as file:
