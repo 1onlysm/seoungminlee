@@ -2,8 +2,9 @@ name: SPY Nasdaq options experimental EOD
 on:
   workflow_dispatch:
   schedule:
-    - cron: '17 21 * * 1-5'
-    - cron: '17 22 * * 1-5'
+    # 07:05 KST every weekday, regardless of US daylight saving time.
+    # 17:05 EST / 18:05 EDT; one cron prevents duplicate scheduled collections.
+    - cron: '5 22 * * 1-5'
 permissions:
   contents: read
 concurrency:
@@ -18,19 +19,52 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Collect at 17:17 New York time only (DST aware)
+      - name: Collect SPY options (fail if scheduled deadline missed)
         shell: bash
         run: |
-          if [ "$(TZ=America/New_York date +%H)" != "17" ]; then
-            echo "Not the 17:00 ET hour; skipping alternate UTC cron."
-            exit 0
-          fi
+          python - <<'PY'
+          from datetime import datetime, time, timezone
+          from zoneinfo import ZoneInfo
+          import os, sys
+          now = datetime.now(timezone.utc)
+          kst = now.astimezone(ZoneInfo("Asia/Seoul"))
+          ny = now.astimezone(ZoneInfo("America/New_York"))
+          print(f"Execution time: UTC={now.isoformat()} KST={kst.isoformat()} NY={ny.isoformat()}", flush=True)
+          if os.environ.get("GITHUB_EVENT_NAME") == "schedule":
+              if kst.time() >= time(7, 30) or kst.time() < time(7, 0):
+                  sys.exit("FAILED: scheduled collection outside 07:00-07:30 KST deadline window")
+          if ny.weekday() >= 5 or ny.time() < time(16, 30):
+              sys.exit("FAILED: outside New York weekday post-close collection window")
+          PY
           python collector.py
+      - name: Verify output files and data integrity
+        shell: bash
+        run: |
+          python - <<'PY'
+          import csv, json
+          from pathlib import Path
+          dirs = list(Path("output").glob("*"))
+          if len(dirs) != 1 or not dirs[0].is_dir():
+              raise SystemExit("FAILED: expected exactly one output snapshot directory")
+          d = dirs[0]
+          expected = ("summary.json", "contracts.csv", "experimental_metrics.json")
+          for name in expected:
+              if not (d / name).is_file() or (d / name).stat().st_size == 0:
+                  raise SystemExit(f"FAILED: missing/empty {name}")
+          summary = json.loads((d / "summary.json").read_text())
+          metrics = json.loads((d / "experimental_metrics.json").read_text())
+          with (d / "contracts.csv").open(newline="") as f:
+              rows = sum(1 for _ in csv.DictReader(f))
+          if rows < 500 or rows != summary.get("contract_rows"):
+              raise SystemExit(f"FAILED: contracts.csv rows={rows}, summary={summary.get('contract_rows')}")
+          if summary.get("approved_for_navi") is not False or metrics.get("approved_for_navi") is not False:
+              raise SystemExit("FAILED: experimental data cannot be approved for NAVI")
+          print(f"VERIFIED_OUTPUT: snapshot={d.name}, contracts={rows}, status={summary['status']}", flush=True)
+          PY
       - name: Upload experimental summary and contract CSV
-        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: spy-options-${{ github.run_id }}
           path: output/
-          if-no-files-found: ignore
+          if-no-files-found: error
           retention-days: 30
