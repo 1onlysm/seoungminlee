@@ -1,5 +1,5 @@
 """Experimental Nasdaq SPY options snapshot collector; independent of NAVI."""
-import csv, hashlib, json, os, re, sys, urllib.request
+import csv, hashlib, json, re, sys, urllib.request
 from collections import Counter
 from datetime import datetime
 from pathlib import Path
@@ -207,8 +207,8 @@ def main():
         writer.writeheader()
         writer.writerows(contracts)
     metrics = experimental_metrics(contracts)
-    (dest / "experimental_metrics.json").write_text(json.dumps(metrics, indent=2) + "\\n")
-    print("EXPERIMENTAL METRICS: " + json.dumps({
+    (dest / "experimental_metrics.json").write_text(json.dumps(metrics, indent=2) + "\n")
+    if not contracts or not standard:\n        raise ValueError("no standard SPY contracts collected")\n    print("EXPERIMENTAL METRICS: " + json.dumps({
         "expiry_count": len(metrics["expiry_metrics"]),
         "max_pain_computed": sum(v["max_pain"] is not None for v in metrics["expiry_metrics"].values()),
         "status": metrics["status"], "approved_for_navi": False
