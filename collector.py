@@ -208,7 +208,9 @@ def main():
         writer.writerows(contracts)
     metrics = experimental_metrics(contracts)
     (dest / "experimental_metrics.json").write_text(json.dumps(metrics, indent=2) + "\n")
-    if not contracts or not standard:\n        raise ValueError("no standard SPY contracts collected")\n    print("EXPERIMENTAL METRICS: " + json.dumps({
+    if not contracts or not standard:
+        raise ValueError("no standard SPY contracts collected")
+    print("EXPERIMENTAL METRICS: " + json.dumps({
         "expiry_count": len(metrics["expiry_metrics"]),
         "max_pain_computed": sum(v["max_pain"] is not None for v in metrics["expiry_metrics"].values()),
         "status": metrics["status"], "approved_for_navi": False
