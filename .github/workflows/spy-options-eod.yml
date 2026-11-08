@@ -19,20 +19,19 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Collect SPY options (fail if scheduled deadline missed)
+      - name: Collect SPY options (allow delayed schedule, require NY post-close)
         shell: bash
         run: |
           python - <<'PY'
           from datetime import datetime, time, timezone
           from zoneinfo import ZoneInfo
-          import os, sys
+          import sys
           now = datetime.now(timezone.utc)
           kst = now.astimezone(ZoneInfo("Asia/Seoul"))
           ny = now.astimezone(ZoneInfo("America/New_York"))
           print(f"Execution time: UTC={now.isoformat()} KST={kst.isoformat()} NY={ny.isoformat()}", flush=True)
-          if os.environ.get("GITHUB_EVENT_NAME") == "schedule":
-              if kst.time() >= time(7, 30) or kst.time() < time(7, 0):
-                  sys.exit("FAILED: scheduled collection outside 07:00-07:30 KST deadline window")
+          # GitHub schedule start times are not guaranteed; do not reject delayed runs
+          # solely because the original 07:30 KST target has passed.
           if ny.weekday() >= 5 or ny.time() < time(16, 30):
               sys.exit("FAILED: outside New York weekday post-close collection window")
           PY
