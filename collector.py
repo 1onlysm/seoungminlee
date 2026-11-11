@@ -1,11 +1,12 @@
-"""Experimental Nasdaq SPY options snapshot collector; independent of NAVI."""
+"""Experimental Nasdaq multi-ticker options snapshots; independent of NAVI."""
 import csv, hashlib, json, re, sys, urllib.request
 from collections import Counter
 from datetime import datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
-URL = "https://api.nasdaq.com/api/quote/SPY/option-chain?assetclass=etf&limit=20000&fromdate=all"
+TICKERS = ("SPY", "QQQ", "SOXX")
+URL_TEMPLATE = "https://api.nasdaq.com/api/quote/{ticker}/option-chain?assetclass=etf&limit=20000&fromdate=all"
 ET = ZoneInfo("America/New_York")
 FIELDS = ("c_Volume", "p_Volume", "c_Openinterest", "p_Openinterest")
 
@@ -22,7 +23,7 @@ def parse(payload):
         raise ValueError("API status not 200")
     data = payload.get("data") or {}
     rows = (data.get("table") or {}).get("rows")
-    if not isinstance(rows, list) or len(rows) < 500 or data.get("totalRecord") != len(rows):
+    if not isinstance(rows, list) or len(rows) < 2 or data.get("totalRecord") != len(rows):
         raise ValueError("missing, short or truncated rows")
     expiry = None
     out, seen = [], set()
@@ -46,12 +47,12 @@ def parse(payload):
         out.append(record)
     return data, out
 
-def experimental_metrics(contracts):
+def experimental_metrics(contracts, ticker="SPY"):
     """Observed-only option metrics; never interpret missing OI/volume as zero."""
     from collections import defaultdict
     from decimal import Decimal, InvalidOperation
 
-    standard = [c for c in contracts if c["root"] == "SPY"]
+    standard = [c for c in contracts if c["root"] == ticker]
     results = {}
     for expiry in sorted(set(c["expiry"] for c in standard)):
         subset = [c for c in standard if c["expiry"] == expiry]
@@ -115,14 +116,12 @@ def experimental_metrics(contracts):
             "data_status": "UNVERIFIED", "approved_for_navi": False,
         }
     return {"status": "EXPERIMENTAL_UNVERIFIED", "approved_for_navi": False,
-            "root_filter": "SPY_ONLY_EXCLUDES_ADJUSTED_ROOTS",
+            "root_filter": ticker + "_ONLY_EXCLUDES_ADJUSTED_ROOTS",
             "missing_is_not_zero": True, "expiry_metrics": results}
 
-def main():
-    now = datetime.now(ET)
-    if now.weekday() >= 5 or not (16 <= now.hour <= 23) or (now.hour == 16 and now.minute < 30):
-        raise ValueError("outside weekday post-close window")
-    req = urllib.request.Request(URL, headers={
+def collect(ticker, now, dest):
+    url = URL_TEMPLATE.format(ticker=ticker)
+    req = urllib.request.Request(url, headers={
         "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/124.0 Safari/537.36",
         "Accept": "application/json", "Referer": "https://www.nasdaq.com/"})
     with urllib.request.urlopen(req, timeout=30) as response:
@@ -176,7 +175,7 @@ def main():
             "missing_fields": {f: sum(c[f] is None for c in subset) for f in FIELDS},
         }
     summary = {
-        "source": URL, "snapshot_date_et": now.date().isoformat(),
+        "source": url, "ticker": ticker, "snapshot_date_et": now.date().isoformat(),
         "fetched_at_et": now.isoformat(), "nasdaq_last_trade": stamp,
         "underlying_last_trade_date_et": quote_date,
         "underlying_last_trade_time_et": quote_time,
@@ -190,33 +189,57 @@ def main():
         "roots": dict(Counter(c["root"] for c in contracts)),
         "missing_fields": missing, "observed_totals_excluding_missing": totals,
         "root_quality": root_quality,
-        "standard_spy_missing_fields": standard_missing,
-        "standard_spy_observed_totals_excluding_missing": standard_totals,
-        "standard_spy_expiry_quality": standard_expiry_quality,
+        "standard_root_missing_fields": standard_missing,
+        "standard_root_observed_totals_excluding_missing": standard_totals,
+        "standard_root_expiry_quality": standard_expiry_quality,
         "missing_values_treated_as_zero": False,
         "raw_sha256": hashlib.sha256(raw).hexdigest(),
         "status": "UNVERIFIED",
         "status_reason": "Option-chain EOD as-of timestamp not independently established; underlying lastTrade is insufficient",
         "approved_for_navi": False,
     }
-    dest = Path("output") / now.strftime("%Y-%m-%dT%H%M%S%f_ET")
-    dest.mkdir(parents=True, exist_ok=False)
     (dest / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")
     with (dest / "contracts.csv").open("w", newline="") as file:
         writer = csv.DictWriter(file, fieldnames=["root", "expiry", "strike", *FIELDS])
         writer.writeheader()
         writer.writerows(contracts)
-    metrics = experimental_metrics(contracts)
+    metrics = experimental_metrics(contracts, ticker)
     (dest / "experimental_metrics.json").write_text(json.dumps(metrics, indent=2) + "\n")
     if not contracts or not standard:
-        raise ValueError("no standard SPY contracts collected")
+        raise ValueError("no standard " + ticker + " contracts collected")
     print("EXPERIMENTAL METRICS: " + json.dumps({
         "expiry_count": len(metrics["expiry_metrics"]),
         "max_pain_computed": sum(v["max_pain"] is not None for v in metrics["expiry_metrics"].values()),
         "status": metrics["status"], "approved_for_navi": False
     }))
     # Raw JSON is intentionally not published to artifacts in this PUBLIC repo.
-    print(json.dumps(summary, indent=2))
+    print(json.dumps({"ticker": ticker, "contract_rows": len(contracts), "status": summary["status"]}))
+    return summary
+
+
+def main():
+    now = datetime.now(ET)
+    if now.weekday() >= 5 or not (16 <= now.hour <= 23) or (now.hour == 16 and now.minute < 30):
+        raise ValueError("outside weekday post-close window")
+    dest = Path("output") / now.strftime("%Y-%m-%dT%H%M%S%f_ET")
+    dest.mkdir(parents=True, exist_ok=False)
+    results = {}
+    for ticker in TICKERS:
+        folder = dest / ticker
+        folder.mkdir()
+        try:
+            summary = collect(ticker, now, folder)
+            results[ticker] = {"status": "COLLECTED_UNVERIFIED", "rows": summary["contract_rows"]}
+        except Exception as exc:
+            results[ticker] = {"status": "FAILED", "reason": str(exc)[:500]}
+            print(f"COLLECTION_FAILED ticker={ticker}: {exc}", file=sys.stderr)
+    (dest / "collection_manifest.json").write_text(json.dumps({
+        "fetched_at_et": now.isoformat(), "approved_for_navi": False,
+        "results": results
+    }, indent=2) + "\n")
+    if results["SPY"]["status"] == "FAILED":
+        raise RuntimeError("SPY baseline collection failed")
+    print("COLLECTION_MANIFEST: " + json.dumps(results))
 
 if __name__ == "__main__":
     main()
