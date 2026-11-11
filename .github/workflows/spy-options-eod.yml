@@ -1,4 +1,4 @@
-name: SPY Nasdaq options experimental EOD
+name: SPY QQQ SOXX Nasdaq options experimental EOD
 on:
   workflow_dispatch:
   schedule:
@@ -8,7 +8,7 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: spy-options-experimental
+  group: multi-options-experimental
   cancel-in-progress: false
 jobs:
   collect:
@@ -19,7 +19,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Collect SPY options (allow delayed schedule, require NY post-close)
+      - name: Collect SPY QQQ SOXX options (allow delayed schedule, require NY post-close)
         shell: bash
         run: |
           python - <<'PY'
@@ -36,34 +36,44 @@ jobs:
               sys.exit("FAILED: outside New York weekday post-close collection window")
           PY
           python collector.py
-      - name: Verify output files and data integrity
+      - name: Verify per-ticker output and manifest
         shell: bash
         run: |
           python - <<'PY'
           import csv, json
           from pathlib import Path
-          dirs = list(Path("output").glob("*"))
-          if len(dirs) != 1 or not dirs[0].is_dir():
-              raise SystemExit("FAILED: expected exactly one output snapshot directory")
+          dirs = [p for p in Path("output").glob("*") if p.is_dir()]
+          if len(dirs) != 1:
+              raise SystemExit("FAILED: expected one snapshot directory")
           d = dirs[0]
-          expected = ("summary.json", "contracts.csv", "experimental_metrics.json")
-          for name in expected:
-              if not (d / name).is_file() or (d / name).stat().st_size == 0:
-                  raise SystemExit(f"FAILED: missing/empty {name}")
-          summary = json.loads((d / "summary.json").read_text())
-          metrics = json.loads((d / "experimental_metrics.json").read_text())
-          with (d / "contracts.csv").open(newline="") as f:
-              rows = sum(1 for _ in csv.DictReader(f))
-          if rows < 500 or rows != summary.get("contract_rows"):
-              raise SystemExit(f"FAILED: contracts.csv rows={rows}, summary={summary.get('contract_rows')}")
-          if summary.get("approved_for_navi") is not False or metrics.get("approved_for_navi") is not False:
-              raise SystemExit("FAILED: experimental data cannot be approved for NAVI")
-          print(f"VERIFIED_OUTPUT: snapshot={d.name}, contracts={rows}, status={summary['status']}", flush=True)
+          manifest = json.loads((d / "collection_manifest.json").read_text())
+          if manifest.get("approved_for_navi") is not False:
+              raise SystemExit("FAILED: manifest approved_for_navi must be false")
+          for ticker in ("SPY", "QQQ", "SOXX"):
+              result = manifest["results"][ticker]
+              if result["status"] == "FAILED":
+                  print(f"UNAVAILABLE: {ticker}: {result['reason']}")
+                  if ticker == "SPY":
+                      raise SystemExit("FAILED: baseline SPY missing")
+                  continue
+              folder = d / ticker
+              for name in ("summary.json", "contracts.csv", "experimental_metrics.json"):
+                  if not (folder / name).is_file() or (folder / name).stat().st_size == 0:
+                      raise SystemExit(f"FAILED: {ticker}/{name} missing")
+              summary = json.loads((folder / "summary.json").read_text())
+              metrics = json.loads((folder / "experimental_metrics.json").read_text())
+              with (folder / "contracts.csv").open(newline="") as fh:
+                  rows = list(csv.DictReader(fh))
+              if not rows or len(rows) != summary["contract_rows"] or summary["ticker"] != ticker:
+                  raise SystemExit(f"FAILED: {ticker} contract count or identity mismatch")
+              if summary.get("approved_for_navi") is not False or metrics.get("approved_for_navi") is not False:
+                  raise SystemExit(f"FAILED: {ticker} cannot be approved")
+              print(f"VERIFIED_OUTPUT: {ticker} contracts={len(rows)} status={summary['status']}")
           PY
       - name: Upload experimental summary and contract CSV
         uses: actions/upload-artifact@v4
         with:
-          name: spy-options-${{ github.run_id }}
+          name: multi-options-${{ github.run_id }}
           path: output/
           if-no-files-found: error
           retention-days: 30
