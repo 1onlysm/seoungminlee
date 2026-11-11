@@ -1,79 +1,65 @@
-name: SPY QQQ SOXX Nasdaq options experimental EOD
+name: NAVI OPTIONS LAB API diagnostic (manual only)
 on:
   workflow_dispatch:
-  schedule:
-    # 07:05 KST every weekday, regardless of US daylight saving time.
-    # 17:05 EST / 18:05 EDT; one cron prevents duplicate scheduled collections.
-    - cron: '5 22 * * 1-5'
 permissions:
   contents: read
-concurrency:
-  group: multi-options-experimental
-  cancel-in-progress: false
 jobs:
-  collect:
+  diagnose:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Collect SPY QQQ SOXX options (allow delayed schedule, require NY post-close)
+      - name: Probe Nasdaq options chain without changing collector
         shell: bash
         run: |
           python - <<'PY'
-          from datetime import datetime, time, timezone
-          from zoneinfo import ZoneInfo
-          import sys
-          now = datetime.now(timezone.utc)
-          kst = now.astimezone(ZoneInfo("Asia/Seoul"))
-          ny = now.astimezone(ZoneInfo("America/New_York"))
-          print(f"Execution time: UTC={now.isoformat()} KST={kst.isoformat()} NY={ny.isoformat()}", flush=True)
-          # GitHub schedule start times are not guaranteed; do not reject delayed runs
-          # solely because the original 07:30 KST target has passed.
-          if ny.weekday() >= 5 or ny.time() < time(16, 30):
-              sys.exit("FAILED: outside New York weekday post-close collection window")
-          PY
-          python collector.py
-      - name: Verify per-ticker output and manifest
-        shell: bash
-        run: |
-          python - <<'PY'
-          import csv, json
+          import json, re, time, urllib.request, urllib.error
+          from collections import Counter
           from pathlib import Path
-          dirs = [p for p in Path("output").glob("*") if p.is_dir()]
-          if len(dirs) != 1:
-              raise SystemExit("FAILED: expected one snapshot directory")
-          d = dirs[0]
-          manifest = json.loads((d / "collection_manifest.json").read_text())
-          if manifest.get("approved_for_navi") is not False:
-              raise SystemExit("FAILED: manifest approved_for_navi must be false")
-          for ticker in ("SPY", "QQQ", "SOXX"):
-              result = manifest["results"][ticker]
-              if result["status"] == "FAILED":
-                  print(f"UNAVAILABLE: {ticker}: {result['reason']}")
-                  if ticker == "SPY":
-                      raise SystemExit("FAILED: baseline SPY missing")
-                  continue
-              folder = d / ticker
-              for name in ("summary.json", "contracts.csv", "experimental_metrics.json"):
-                  if not (folder / name).is_file() or (folder / name).stat().st_size == 0:
-                      raise SystemExit(f"FAILED: {ticker}/{name} missing")
-              summary = json.loads((folder / "summary.json").read_text())
-              metrics = json.loads((folder / "experimental_metrics.json").read_text())
-              with (folder / "contracts.csv").open(newline="") as fh:
-                  rows = list(csv.DictReader(fh))
-              if not rows or len(rows) != summary["contract_rows"] or summary["ticker"] != ticker:
-                  raise SystemExit(f"FAILED: {ticker} contract count or identity mismatch")
-              if summary.get("approved_for_navi") is not False or metrics.get("approved_for_navi") is not False:
-                  raise SystemExit(f"FAILED: {ticker} cannot be approved")
-              print(f"VERIFIED_OUTPUT: {ticker} contracts={len(rows)} status={summary['status']}")
+          tickers = {"SPY":"etf","QQQ":"etf","SOXX":"etf","NVDA":"stocks","AMD":"stocks","TSLA":"stocks","MSTR":"stocks","PLTR":"stocks","MU":"stocks","CRWV":"stocks"}
+          fields = ("c_Volume","p_Volume","c_Openinterest","p_Openinterest")
+          results = {}
+          for ticker, assetclass in tickers.items():
+              url = f"https://api.nasdaq.com/api/quote/{ticker}/option-chain?assetclass={assetclass}&limit=20000&fromdate=all"
+              record = {"ticker":ticker,"assetclass":assetclass,"http_status":None,"api_status":None,"status":"UNVERIFIED"}
+              try:
+                  request = urllib.request.Request(url, headers={"User-Agent":"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/124.0 Safari/537.36","Accept":"application/json","Referer":"https://www.nasdaq.com/"})
+                  with urllib.request.urlopen(request, timeout=25) as response:
+                      record["http_status"] = response.status
+                      raw = response.read(25000001)
+                  if len(raw) > 25000000:
+                      raise ValueError("response exceeds 25 MB")
+                  payload = json.loads(raw)
+                  record["api_status"] = (payload.get("status") or {}).get("rCode")
+                  data = payload.get("data") or {}
+                  rows = (data.get("table") or {}).get("rows")
+                  if not isinstance(rows, list):
+                      raise ValueError("missing option rows")
+                  contracts = [r for r in rows if isinstance(r,dict) and r.get("strike")]
+                  groups = [r.get("expirygroup") for r in rows if isinstance(r,dict) and r.get("expirygroup")]
+                  roots = Counter()
+                  for row in contracts:
+                      m = re.search(r"/([a-z0-9]+)-+\d{6}c\d+", row.get("drillDownURL") or "", re.I)
+                      roots[m.group(1).upper() if m else "UNKNOWN"] += 1
+                  record.update({"reported_total":data.get("totalRecord"),"row_count":len(rows),"contract_rows":len(contracts),"expiry_groups":len(groups),"expiry_count":len(set(groups)),"root_counts":dict(roots),"field_present":{f:sum(f in r for r in contracts) for f in fields},"field_missing":{f:sum(r.get(f) in (None,"","--") for r in contracts) for f in fields},"strike_present":sum(r.get("strike") not in (None,"","--") for r in contracts)})
+                  record["status"] = "RESPONDED_UNVERIFIED" if record["http_status"] == 200 and record["api_status"] == 200 and len(contracts)>0 else "UNUSABLE_RESPONSE"
+              except urllib.error.HTTPError as exc:
+                  record["http_status"] = exc.code
+                  record["error"] = f"HTTPError: {exc.reason}"
+              except Exception as exc:
+                  record["error"] = f"{type(exc).__name__}: {str(exc)[:250]}"
+              results[ticker] = record
+              print(json.dumps(record,ensure_ascii=False),flush=True)
+              time.sleep(1)
+          Path("options-api-diagnostic.json").write_text(json.dumps({"approved_for_navi":False,"results":results},ensure_ascii=False,indent=2)+"\n")
           PY
-      - name: Upload experimental summary and contract CSV
+      - name: Upload diagnostic results
         uses: actions/upload-artifact@v4
         with:
-          name: multi-options-${{ github.run_id }}
-          path: output/
+          name: options-api-diagnostic-${{ github.run_id }}
+          path: options-api-diagnostic.json
           if-no-files-found: error
           retention-days: 30
