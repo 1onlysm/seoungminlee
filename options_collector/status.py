@@ -1,4 +1,8 @@
 from dataclasses import dataclass, field
+
+API_STATES = {"API_VERIFIED", "FETCH_ERROR", "ACCESS_BLOCKED"}
+DATA_STATES = {"DATA_OBSERVED", "QUALITY_LIMITED", "SCHEMA_MISMATCH"}
+FRESHNESS_STATES = {"EOD_UNVERIFIED", "PENDING_EOD", "STALE", "EOD_VERIFIED"}
 @dataclass
 class Status:
     api: str = "FETCH_ERROR"

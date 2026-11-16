@@ -11,7 +11,7 @@ Experimental, non-operational foundation for the 14 previously API-verified symb
 - `snapshot.py`: immutable daily/ET-date snapshots, atomic/fsync writes, read-back verification, identical-response deduplication, distinct response versions.
 - `status.py`: indicator guard; no PCR, walls, Max Pain, GEX or trade signals are calculated.
 
-Snapshot paths are `data/options/YYYY-MM-DD/SYMBOL/<collection-version>/` with `raw.json`, `contracts.csv`, `quality.json`, and `manifest.json`. The ET date denotes collection grouping only, not EOD confirmation. Manifest records UTC collection time; ET capture is reserved but null until caller supplies a verified timestamp.
+Snapshot paths are `data/options/YYYY-MM-DD/SYMBOL/<collection-version>/` with `raw.json`, `contracts.csv`, `quality.json`, and `manifest.json`. The ET date denotes collection grouping only, not EOD confirmation. Manifest records both UTC and America/New_York collection timestamps. Neither timestamp proves an EOD snapshot.
 
 Adjusted roots are classified separately and never silently merged into the expected standard root. Missing `null`, empty, `--`, and absent fields are preserved distinctly from explicit numeric zero.
 
