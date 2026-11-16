@@ -1,0 +1,12 @@
+{
+  "status": {"rCode": 200},
+  "data": {
+    "totalRecord": 3,
+    "lastTrade": "LAST TRADE: $160.71 (AS OF NOV 16, 2026 2:29 PM ET)",
+    "table": {"rows": [
+      {"expirygroup": "November 20, 2026", "expiryDate": null, "strike": null, "c_Volume": null, "p_Volume": null, "c_Openinterest": null, "p_Openinterest": null, "drillDownURL": null},
+      {"expirygroup": "", "expiryDate": "Nov 20", "strike": "160.00", "c_Volume": "8", "p_Volume": "--", "c_Openinterest": "0", "p_Openinterest": null, "drillDownURL": "/market-activity/stocks/pltr/option-chain/call-put-options/pltr--261120c00160000"},
+      {"expirygroup": "", "expiryDate": "Nov 20", "strike": "170.00", "c_Volume": "odd", "p_Volume": "3", "c_Openinterest": "2", "drillDownURL": "/market-activity/stocks/pltr/option-chain/call-put-options/pltr--261120c00170000"}
+    ]}
+  }
+}

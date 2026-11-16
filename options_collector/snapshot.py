@@ -42,7 +42,7 @@ def _csv_text(symbol,rows):
     import io
     out=io.StringIO(newline=""); w=csv.DictWriter(out,fieldnames=CSV_FIELDS,extrasaction="ignore"); w.writeheader()
     for row in rows:
-        w.writerow({"symbol":symbol,"expiration":row.get("_expiry_group"),"strike":row.get("strikePrice"),"root":row.get("_root"),"root_class":row.get("_root_class"),"call_option":row.get("c_Option"),"put_option":row.get("p_Option"),"c_volume":row.get("c_Volume"),"p_volume":row.get("p_Volume"),"c_openinterest":row.get("c_Openinterest"),"p_openinterest":row.get("p_Openinterest"),"raw_row_json":json.dumps(row,ensure_ascii=False,separators=(",",":"))})
+        w.writerow({"symbol":symbol,"expiration":row.get("_expiration") or row.get("_expiry_group"),"strike":row.get("_strike_raw",row.get("strike",row.get("strikePrice"))),"root":row.get("_root"),"root_class":row.get("_root_class"),"call_option":row.get("c_Option"),"put_option":row.get("p_Option"),"c_volume":row.get("c_Volume"),"p_volume":row.get("p_Volume"),"c_openinterest":row.get("c_Openinterest"),"p_openinterest":row.get("p_Openinterest"),"raw_row_json":json.dumps(row,ensure_ascii=False,separators=(",",":"),default=str)})
     return out.getvalue()
 def _atomic_bytes(path,data):
     _atomic_write(path,data,True)
