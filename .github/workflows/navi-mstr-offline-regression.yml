@@ -1,0 +1,39 @@
+name: NAVI OPTIONS LAB MSTR offline regression (manual only)
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: navi-options-mstr-offline-regression
+  cancel-in-progress: false
+jobs:
+  offline-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout frozen WORK 04-E commit
+        uses: actions/checkout@v4
+        with:
+          ref: 6e840cf9313864f7b4d6a4ca96766b47771d3e68
+          persist-credentials: false
+      - name: Verify frozen commit
+        shell: bash
+        run: |
+          test "$(git rev-parse HEAD)" = "6e840cf9313864f7b4d6a4ca96766b47771d3e68"
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run offline unit tests only (no API calls)
+        shell: bash
+        run: |
+          set -o pipefail
+          python -m unittest discover -s tests -v 2>&1 | tee test-results.txt
+      - name: Upload test log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: navi-options-mstr-offline-${{ github.run_id }}
+          path: test-results.txt
+          if-no-files-found: ignore
+          retention-days: 14
