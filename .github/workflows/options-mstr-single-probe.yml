@@ -1,0 +1,75 @@
+name: Options MSTR single-symbol probe (manual only)
+on:
+  workflow_dispatch:
+    inputs:
+      run_mode:
+        description: Offline regression is the default. Live mode is separately gated.
+        type: choice
+        options: [offline, live]
+        default: offline
+      confirm_live_probe:
+        description: Confirm one MSTR request only; keep unchecked for offline validation.
+        type: boolean
+        required: true
+        default: false
+permissions:
+  contents: read
+concurrency:
+  group: navi-options-mstr-single-probe
+  cancel-in-progress: false
+jobs:
+  offline:
+    if: ${{ inputs.run_mode == 'offline' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run offline regression suite
+        shell: bash
+        run: |
+          set -o pipefail
+          python -m unittest discover -s tests -v 2>&1 | tee test-results.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: naviopt-mstr-offline-${{ github.run_id }}
+          path: test-results.txt
+          if-no-files-found: ignore
+          retention-days: 14
+  live-probe:
+    if: ${{ inputs.run_mode == 'live' && inputs.confirm_live_probe == true }}
+    runs-on: ubuntu-latest
+    environment: navi-options-live-probe
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run offline safety regression before live request
+        shell: bash
+        run: |
+          set -o pipefail
+          python -m unittest discover -s tests -v 2>&1 | tee test-results.txt
+      - name: Make one MSTR request and persist evidence
+        run: python -m options_collector.single_run --mode live --symbol MSTR --confirm-live --output runs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: naviopt-mstr-live-evidence-${{ github.run_id }}
+          path: |
+            runs/
+            test-results.txt
+          if-no-files-found: warn
+          retention-days: 14
+  live-not-confirmed:
+    if: ${{ inputs.run_mode == 'live' && inputs.confirm_live_probe != true }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 1
+    steps:
+      - run: |
+          echo "LIVE mode was selected without confirm_live_probe=true; no API request is permitted."
+          exit 1
