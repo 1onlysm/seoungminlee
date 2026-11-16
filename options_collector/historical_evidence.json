@@ -1,0 +1,8 @@
+{
+  "evidence_type": "user_supplied_historical_summary",
+  "raw_responses_included": false,
+  "api_verified_symbols": ["SPY", "QQQ", "SOXX", "NVDA", "IWM", "IBIT", "AMD", "TSLA", "MSTR", "PLTR", "MU", "CRWV", "COIN", "MARA"],
+  "quality_state": "QUALITY_LIMITED",
+  "freshness_state": "EOD_UNVERIFIED",
+  "note": "Historical API access summaries are retained as metadata only. They are not current snapshots and do not contain reconstructed raw responses."
+}

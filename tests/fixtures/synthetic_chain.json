@@ -1,0 +1,9 @@
+{
+  "status": {"rCode": 200},
+  "data": {"table": {"totalRecord": 2, "rows": [
+    {"expiryDate": "2026-12-18"},
+    {"strikePrice": "100.00", "c_Option": "SPY261218C00100000", "p_Option": "SPY261218P00100000", "c_Volume": "0", "p_Volume": null, "c_Openinterest": "--", "p_Openinterest": "12", "drillDownURL": "/quote/SPY261218C00100000"},
+    {"expiryDate": "2027-01-15"},
+    {"strikePrice": "101.00", "c_Option": "SPY261215C00101000", "p_Option": "SPY261215P00101000", "c_Volume": "", "p_Volume": "4", "c_Openinterest": "2", "drillDownURL": "/quote/SPY261215C00101000"}
+  ]}}
+}

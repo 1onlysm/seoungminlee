@@ -1,0 +1,42 @@
+name: Options 14-symbol experimental (manual only)
+on:
+  workflow_dispatch:
+    inputs:
+      run_mode:
+        description: Offline regression by default; live collection requires separate review and explicit enablement.
+        type: choice
+        options: [offline, live]
+        default: offline
+      symbols:
+        description: Space-separated registry symbols; ignored in offline mode.
+        required: false
+        type: string
+        default: "SPY QQQ SOXX IWM IBIT NVDA AMD TSLA MSTR PLTR MU CRWV COIN MARA"
+permissions:
+  contents: read
+jobs:
+  collector:
+    if: ${{ inputs.run_mode == 'offline' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m unittest discover -s tests -v
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: options-14-offline-evidence-${{ github.run_id }}
+          path: test-results.txt
+          if-no-files-found: ignore
+          retention-days: 14
+  live-collection-design:
+    if: ${{ inputs.run_mode == 'live' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - run: |
+          echo "Live collection is intentionally gated pending separate authorization and runner-path review."
+          exit 1
