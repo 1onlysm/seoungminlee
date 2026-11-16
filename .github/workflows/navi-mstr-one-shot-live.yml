@@ -1,0 +1,64 @@
+name: NAVI OPTIONS LAB MSTR one-shot LIVE probe (manual only)
+on:
+  workflow_dispatch:
+    inputs:
+      authorization:
+        description: 'Type exactly MSTR-ONE-LIVE-REQUEST to authorize a single attempt. Do not rerun.'
+        required: true
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: navi-options-mstr-one-shot-live-probe
+  cancel-in-progress: false
+jobs:
+  live-probe:
+    if: ${{ inputs.authorization == 'MSTR-ONE-LIVE-REQUEST' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout frozen WORK 04-E commit
+        uses: actions/checkout@v4
+        with:
+          ref: 6e840cf9313864f7b4d6a4ca96766b47771d3e68
+          persist-credentials: false
+      - name: Verify exact frozen baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "6e840cf9313864f7b4d6a4ca96766b47771d3e68"
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Offline safety regression gate (59 tests expected)
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m unittest discover -s tests -v 2>&1 | tee test-results.txt
+          grep -Eq '^Ran 59 tests in ' test-results.txt
+          grep -Eq '^OK$' test-results.txt
+      - name: Dispatch exactly one MSTR LIVE attempt
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m options_collector.single_run --mode live --symbol MSTR --confirm-live --output runs 2>&1 | tee live-probe-console.txt
+      - name: Preserve evidence even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: navi-options-mstr-live-evidence-${{ github.run_id }}
+          path: |
+            runs/
+            test-results.txt
+            live-probe-console.txt
+          if-no-files-found: warn
+          retention-days: 30
+  invalid-confirmation:
+    if: ${{ inputs.authorization != 'MSTR-ONE-LIVE-REQUEST' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 1
+    steps:
+      - run: |
+          echo 'Confirmation mismatch: no API request authorized or executed.'
+          exit 1
