@@ -3,7 +3,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from options_collector.nvda_dashboard import build_dashboard, load_verified_data
+from options_collector.nvda_dashboard import build_dashboard, load_verified_data, _validate_price_reference
 from options_collector.nvda_strike_map import aggregate_strikes
 
 RUN_ROOT = Path("/workspace/scratch/navi-options-work04r-live/naviopt04r-20261117T051903Z-80a05c75")
@@ -20,6 +20,57 @@ def _load_real():
 
 
 class NvdaDashboardTests(unittest.TestCase):
+    def test_historical_last_trade_is_not_mislabeled_as_current(self):
+        data, validation = _load_real()
+        ref = data["price_reference"]
+        self.assertEqual(ref["price"], 156.14)
+        self.assertEqual(ref["currency"], "USD")
+        self.assertEqual(ref["price_type"], "HISTORICAL_REFERENCE")
+        self.assertEqual(ref["price_timestamp"], "2026-11-16")
+        self.assertEqual(ref["timestamp_precision"], "DATE")
+        self.assertEqual(ref["verification_status"], "HISTORICAL_REFERENCE_ONLY")
+        self.assertFalse(ref["synchronous_with_option_chain"])
+        with tempfile.TemporaryDirectory() as temp:
+            paths = build_dashboard(data, validation, Path(temp) / "dash", render_png=False)
+            html = Path(paths["html"]).read_text(encoding="utf-8")
+            price_data = json.loads(Path(paths["price_data_contract_json"]).read_text(encoding="utf-8"))
+            audit = json.loads(Path(paths["price_source_audit_json"]).read_text(encoding="utf-8"))
+        self.assertIn("NVDA 과거 참고가격", html)
+        self.assertIn("Number(priceReference.price).toFixed(2)", html)
+        self.assertIn("synchronous_with_option_chain", json.dumps(price_data))
+        self.assertFalse(audit["is_current_price"])
+        self.assertFalse(audit["is_regular_close_verified"])
+        self.assertEqual(audit["option_data_time_synchronization"], "NOT_ESTABLISHED")
+
+    def test_price_contract_negative_cases_and_missing_source_fallback(self):
+        self.assertIsNone(_validate_price_reference(None)["price"])
+        self.assertEqual(_validate_price_reference(None)["verification_status"], "SPOT_PRICE_SOURCE_UNAVAILABLE")
+        base = {"symbol":"NVDA", "price":123.45, "currency":"USD", "price_type":"HISTORICAL_REFERENCE",
+                "price_timestamp":"2026-11-16", "captured_timestamp":"TEST_ONLY:2026-11-17T00:00:00-05:00",
+                "source":"TEST_ONLY fixture", "verification_status":"HISTORICAL_REFERENCE_ONLY"}
+        for bad in (None, "bad", 0, -1):
+            with self.subTest(price=bad), self.assertRaises(ValueError):
+                _validate_price_reference({**base, "price":bad})
+        for missing in ("price_timestamp", "captured_timestamp", "source"):
+            fixture = {**base, missing:None}
+            with self.subTest(missing=missing), self.assertRaises(ValueError):
+                _validate_price_reference(fixture)
+        with self.assertRaisesRegex(ValueError, "HISTORICAL_PRICE_CANNOT_BE_MARKED_CURRENT"):
+            _validate_price_reference({**base, "verification_status":"VERIFIED_PRICE_REFERENCE_AVAILABLE"})
+        with self.assertRaisesRegex(ValueError, "PRICE_TYPE_UNVERIFIED"):
+            _validate_price_reference({**base, "price_type":"UNKNOWN", "verification_status":"HISTORICAL_REFERENCE_ONLY"})
+
+    def test_price_line_shares_strike_axis_and_is_range_conditional(self):
+        data, validation = _load_real()
+        with tempfile.TemporaryDirectory() as temp:
+            html = Path(build_dashboard(data, validation, Path(temp) / "dash", render_png=False)["html"]).read_text(encoding="utf-8")
+        self.assertIn("priceReference.price>=range.min&&priceReference.price<=range.max", html)
+        self.assertIn("const x=xval(priceReference.price)", html)
+        self.assertEqual(html.count("price-reference-line"), 2)
+        self.assertIn("황금 점선은 과거 참고가격이며 옵션 데이터와 시점이 동기화되지 않았습니다.", html)
+        self.assertIn("과거 참고가격이 현재 차트 행사가 범위 밖입니다.", html)
+        self.assertNotIn("현재가 기준으로 가장 가까운 행사가", html)
+
     def test_real_source_and_reference_numerical_contract(self):
         if not NVDA_DIR.exists() or not T_OUT.exists():
             self.skipTest("Preserved WORK 04-R/T evidence unavailable outside this workspace")
