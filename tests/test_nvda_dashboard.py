@@ -96,5 +96,44 @@ class NvdaDashboardTests(unittest.TestCase):
             self.assertEqual(saved_validation["dashboard_png_render"], "same_verified_data_matplotlib")
 
 
+    def test_mobile_focused_range_is_separate_and_full_rows_remain(self):
+        data, validation = _load_real()
+        self.assertEqual(data["mobile_initial_range"], {"min": 140, "max": 220})
+        self.assertEqual(len(data["rows"]), 444)
+        with tempfile.TemporaryDirectory() as temp:
+            html = Path(build_dashboard(data, validation, Path(temp) / "dash", render_png=False)["html"]).read_text(encoding="utf-8")
+        self.assertIn("const initialRange=isMobile&&D.mobile_initial_range", html)
+        self.assertIn("range={...initialRange}", html)
+        self.assertIn("range={...full}", html)
+
+    def test_mobile_tick_density_and_responsive_chart_geometry(self):
+        data, validation = _load_real()
+        with tempfile.TemporaryDirectory() as temp:
+            html = Path(build_dashboard(data, validation, Path(temp) / "dash", render_png=False)["html"]).read_text(encoding="utf-8")
+        self.assertIn("const W=isMobile?560:1000", html)
+        self.assertIn("Math.ceil(rows.length/(isMobile?6:13))", html)
+        self.assertIn("svg.setAttribute('viewBox'", html)
+        self.assertIn(".tick{font-size:13px}", html)
+
+    def test_mobile_tap_selects_nearest_real_strike_and_drag_remains_pan(self):
+        data, validation = _load_real()
+        with tempfile.TemporaryDirectory() as temp:
+            html = Path(build_dashboard(data, validation, Path(temp) / "dash", render_png=False)["html"]).read_text(encoding="utf-8")
+        self.assertIn("Math.abs(e.clientX-start.x)<8", html)
+        self.assertIn("nearest=rows.reduce", html)
+        self.assertIn("if(nearest)select(nearest.strike)", html)
+        self.assertIn("if(drag){const dx=", html)
+        self.assertEqual(data["selected_strike"], 170)
+
+    def test_mobile_controls_have_touch_sized_targets_and_initial_range_button(self):
+        data, validation = _load_real()
+        with tempfile.TemporaryDirectory() as temp:
+            html = Path(build_dashboard(data, validation, Path(temp) / "dash", render_png=False)["html"]).read_text(encoding="utf-8")
+        self.assertIn(".chart-toolbar button{min-height:40px", html)
+        self.assertIn(".range-buttons button{min-height:42px", html)
+        self.assertIn("id=\"reset-range\"", html)
+        self.assertIn("id=\"full-range\"", html)
+        self.assertIn("id=\"center-selected\"", html)
+
 if __name__ == "__main__":
     unittest.main()
