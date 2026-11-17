@@ -105,6 +105,21 @@ class NvdaDashboardTests(unittest.TestCase):
         self.assertIn("const initialRange=isMobile&&D.mobile_initial_range", html)
         self.assertIn("range={...initialRange}", html)
         self.assertIn("range={...full}", html)
+        self.assertIn("draw('volume-chart','call_volume_observed_sum','put_volume_observed_sum','volume-tooltip')", html)
+        self.assertIn("draw('oi-chart','call_oi_observed_sum','put_oi_observed_sum','oi-tooltip')", html)
+        self.assertIn("id=\"oi-range-note\"", html)
+        self.assertIn("Shared strike view · $${fmt(range.min)}–$${fmt(range.max)}", html)
+        self.assertIn("$('reset-range').onclick=()=>{range={...initialRange};render()}", html)
+        self.assertIn("$('full-range').onclick=()=>{range={...full};render()}", html)
+
+    def test_y_axis_uses_numeric_ticks_without_rotated_title_overlap(self):
+        data, validation = _load_real()
+        with tempfile.TemporaryDirectory() as temp:
+            html = Path(build_dashboard(data, validation, Path(temp) / "dash", render_png=False)["html"]).read_text(encoding="utf-8")
+        self.assertIn("class:'tick'", html)
+        self.assertIn("lab.textContent=fmt(max*i/2)", html)
+        self.assertNotIn("ylabel.textContent", html)
+        self.assertNotIn("transform:`rotate(-90", html)
 
     def test_mobile_tick_density_and_responsive_chart_geometry(self):
         data, validation = _load_real()
@@ -137,3 +152,4 @@ class NvdaDashboardTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
