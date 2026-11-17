@@ -13,7 +13,7 @@
 
 보존된 WORK 04-R 원본 SHA-256은 `85f6660ac4a07da061f7d2eb50080dcb40ed6203618710feb017edc55ef3d5ce`로 일치했습니다. 2,188개 계약·24개 만기·444개 행사가와 기존 Volume/OI 합계의 회귀 검증도 통과했습니다.
 
-오프라인 단위 테스트는 21/21 통과했고, 생성 HTML의 인라인 JavaScript 구문 검사도 통과했습니다. 브라우저 실렌더링과 Galaxy 기기 재검증은 완료하지 못했습니다. 로컬 루프백 페이지는 클라우드 브라우저에서 `net::ERR_CONNECTION_REFUSED`였고, 네이티브 Chromium 자동입력은 X11 접근성 공급자 부재 오류로 진행할 수 없었습니다. 따라서 `DEVICE_PENDING`입니다.
+오프라인 단위 테스트는 21/21 통과했고, 생성 HTML의 인라인 JavaScript 구문 검사도 통과했습니다. 실제 브라우저 렌더링과 Galaxy 기기 재검증은 완료하지 못했습니다. 로컬 루프백 페이지는 클라우드 브라우저에서 `net::ERR_CONNECTION_REFUSED`였고, 네이티브 Chromium 자동입력은 X11 접근성 공급자 부재 오류로 진행할 수 없었습니다. 따라서 `DEVICE_PENDING`입니다.
 
 ## 데이터 제한
 
