@@ -108,7 +108,7 @@ class NvdaDashboardTests(unittest.TestCase):
         self.assertIn("draw('volume-chart','call_volume_observed_sum','put_volume_observed_sum','volume-tooltip')", html)
         self.assertIn("draw('oi-chart','call_oi_observed_sum','put_oi_observed_sum','oi-tooltip')", html)
         self.assertIn("id=\"oi-range-note\"", html)
-        self.assertIn("Shared range $'+fmt(range.min)+'–$'+fmt(range.max)", html)
+        self.assertIn("공유 행사가 범위 $'+fmt(range.min)+'–$'+fmt(range.max)", html)
         self.assertIn("$('reset-range').onclick=()=>{range={...initialRange};render()}", html)
         self.assertIn("$('full-range').onclick=()=>{range={...full};render()}", html)
 
@@ -164,11 +164,11 @@ class NvdaDashboardTests(unittest.TestCase):
             html = Path(build_dashboard(data, validation, Path(temp) / "dash", render_png=False)["html"]).read_text(encoding="utf-8")
         self.assertIn("class=\"chain-scroll\"", html)
         self.assertIn("overflow:auto", html)
-        self.assertIn("Call Bid", html)
-        self.assertIn("Call Ask", html)
+        self.assertIn("Bid", html)
+        self.assertIn("Ask", html)
         self.assertNotIn("Call IV", html)
-        self.assertIn("Not observed", html)
-        self.assertIn("numeric 0, when present, is an observed zero", html)
+        self.assertIn("관측되지 않음", html)
+        self.assertIn("숫자 0과 다릅니다", html)
 
     def test_expiration_and_field_audit_outputs_are_saved_and_reopenable(self):
         data, validation = _load_real()
@@ -219,6 +219,47 @@ class NvdaDashboardTests(unittest.TestCase):
         self.assertIn("id=\"reset-range\"", html)
         self.assertIn("id=\"full-range\"", html)
         self.assertIn("id=\"center-selected\"", html)
+
+
+    def test_korean_ui_prevents_browser_translation_and_uses_financial_terms(self):
+        data, validation = _load_real()
+        with tempfile.TemporaryDirectory() as temp:
+            html = Path(build_dashboard(data, validation, Path(temp) / "dash", render_png=False)["html"]).read_text(encoding="utf-8")
+        self.assertIn('<html lang="ko" translate="no">', html)
+        self.assertIn('<meta name="google" content="notranslate">', html)
+        for phrase in ("콜 거래량", "풋 거래량", "미결제약정(OI)", "행사가", "관측률", "기본 보기", "전체 행사가"):
+            self.assertIn(phrase, html)
+        for broken in ("통화량", "볼륨을 높이세요", "미결제 약정을 설정하세요", "풋옵션 넣기", "풋블리 커버리지", "관찰된 부피"):
+            self.assertNotIn(broken, html)
+        self.assertIn("PROVISIONAL", html)
+        self.assertIn("EOD_UNVERIFIED", html)
+
+    def test_chain_is_grouped_call_strike_put_and_mobile_quotes_expand_per_contract(self):
+        data, validation = _load_real()
+        with tempfile.TemporaryDirectory() as temp:
+            html = Path(build_dashboard(data, validation, Path(temp) / "dash", render_png=False)["html"]).read_text(encoding="utf-8")
+        self.assertIn("grid-template-columns:4fr 1fr 4fr", html)
+        self.assertIn("콜 데이터", html)
+        self.assertIn('행사가</th><th colspan="4">풋', html)
+        self.assertIn(".chain-table .quote-col{display:none}", html)
+        self.assertIn("quote-detail-grid", html)
+        self.assertIn("quoteFmt(c.call_bid)", html)
+        self.assertIn("콜 Bid (매수호가)", html)
+        self.assertIn("expandedKey===key", html)
+        self.assertIn("select(Number(tr.dataset.strike))", html)
+        self.assertIn("classList.toggle('selected'", html)
+        self.assertNotIn("IV</th>", html)
+
+    def test_snapshot_metadata_is_collapsed_but_keeps_id_timestamp_and_hash_accessible(self):
+        data, validation = _load_real()
+        with tempfile.TemporaryDirectory() as temp:
+            html = Path(build_dashboard(data, validation, Path(temp) / "dash", render_png=False)["html"]).read_text(encoding="utf-8")
+        self.assertIn('<details class="panel snapshot-details">', html)
+        self.assertIn("['실행 ID',D.run_id],['원본 SHA-256',D.raw_sha256]", html)
+        self.assertIn("수집 시각(UTC)", html)
+        self.assertIn("수집 시각(ET)", html)
+        self.assertIn("range={...initialRange}", html)
+        self.assertIn("range={...full}", html)
 
 if __name__ == "__main__":
     unittest.main()
