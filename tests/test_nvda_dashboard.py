@@ -1,9 +1,12 @@
 import json
+import re
+import shutil
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
 
-from options_collector.nvda_dashboard import build_dashboard, load_verified_data, _validate_price_reference
+from options_collector.nvda_dashboard import HTML, build_dashboard, load_verified_data, _validate_price_reference
 from options_collector.nvda_strike_map import aggregate_strikes
 
 RUN_ROOT = Path("/workspace/scratch/navi-options-work04r-live/naviopt04r-20261117T051903Z-80a05c75")
@@ -17,6 +20,17 @@ def _load_real():
         T_OUT / "nvda_strike_volume.csv", T_OUT / "nvda_strike_oi.csv",
         NVDA_DIR / "manifest.json", NVDA_DIR / "raw.json", RUN_ROOT / "batch_summary.json",
     )
+
+
+def _run_viewport_js(expression, stdin=None):
+    if not shutil.which("node"):
+        raise unittest.SkipTest("Node.js unavailable; JavaScript viewport math not executed")
+    match = re.search(r"/\* VIEWPORT_MATH_START \*/(.*?)/\* VIEWPORT_MATH_END \*/", HTML, re.S)
+    if not match:
+        raise AssertionError("Viewport helper block missing from dashboard HTML")
+    script = match.group(1) + "\nconsole.log(JSON.stringify(" + expression + "));"
+    result = subprocess.run(["node", "-e", script], input=stdin, check=True, text=True, capture_output=True)
+    return json.loads(result.stdout)
 
 
 class NvdaDashboardTests(unittest.TestCase):
@@ -159,9 +173,9 @@ class NvdaDashboardTests(unittest.TestCase):
         self.assertIn("draw('volume-chart','call_volume_observed_sum','put_volume_observed_sum','volume-tooltip')", html)
         self.assertIn("draw('oi-chart','call_oi_observed_sum','put_oi_observed_sum','oi-tooltip')", html)
         self.assertIn("id=\"oi-range-note\"", html)
-        self.assertIn("공유 행사가 범위 $'+fmt(range.min)+'–$'+fmt(range.max)", html)
-        self.assertIn("$('reset-range').onclick=()=>{range={...initialRange};render()}", html)
-        self.assertIn("$('full-range').onclick=()=>{range={...full};render()}", html)
+        self.assertIn("공유 범위 '+money(range.min)+'–'+money(range.max)", html)
+        self.assertIn("$('reset-range').onclick=()=>{viewMode='focused';range={...initialRange};renderViewport()}", html)
+        self.assertIn("$('full-range').onclick=()=>{viewMode='full-overview';range={...full};renderViewport()}", html)
 
     def test_raw_expiration_count_and_totalrecord_contract(self):
         data, validation = _load_real()
@@ -247,7 +261,7 @@ class NvdaDashboardTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp:
             html = Path(build_dashboard(data, validation, Path(temp) / "dash", render_png=False)["html"]).read_text(encoding="utf-8")
         self.assertIn("const W=isMobile?560:1000", html)
-        self.assertIn("Math.ceil(rows.length/(isMobile?6:13))", html)
+        self.assertIn("VM.ticks(range,plotW,isMobile?74:86)", html)
         self.assertIn("svg.setAttribute('viewBox'", html)
         self.assertIn(".tick{font-size:13px}", html)
 
@@ -255,10 +269,10 @@ class NvdaDashboardTests(unittest.TestCase):
         data, validation = _load_real()
         with tempfile.TemporaryDirectory() as temp:
             html = Path(build_dashboard(data, validation, Path(temp) / "dash", render_png=False)["html"]).read_text(encoding="utf-8")
-        self.assertIn("Math.abs(e.clientX-start.x)<8", html)
-        self.assertIn("nearest=rows.reduce", html)
-        self.assertIn("if(nearest)select(nearest.strike)", html)
-        self.assertIn("if(drag){const dx=", html)
+        self.assertIn("const dx=e.clientX-gesture.startX,dy=e.clientY-gesture.startY", html)
+        self.assertIn("nearest=nearestActualStrike(target)", html)
+        self.assertIn("if(nearest!=null)select(nearest)", html)
+        self.assertIn("gesture.mode==='pan'", html)
         self.assertEqual(data["selected_strike"], 170)
 
     def test_mobile_controls_have_touch_sized_targets_and_initial_range_button(self):
@@ -358,7 +372,7 @@ class NvdaDashboardTests(unittest.TestCase):
         self.assertIn("select(Number(tr.dataset.strike))", html)
         self.assertIn("active=selectEl.value;S=stateFor(active)", html)
         self.assertIn("const found=S.rows.some(r=>r.strike===selected)", html)
-        self.assertIn("if(!found&&S.rows.length)selected=S.rows.reduce", html)
+        self.assertIn("if(!found)selected=S.rows.length?S.rows.reduce", html)
         self.assertIn("id=\"center-selected\">선택 행사가로 이동", html)
         self.assertIn("선택 행사가로 이동", html)
 
@@ -371,6 +385,74 @@ class NvdaDashboardTests(unittest.TestCase):
             self.assertIn(status, html)
         self.assertIn(".rankline b{white-space:nowrap}", html)
         self.assertIn(".chain-scroll{overscroll-behavior:contain", html)
+
+    def test_viewport_contract_caps_ordinary_zoom_and_separates_full_overview(self):
+        data, validation = _load_real()
+        with tempfile.TemporaryDirectory() as temp:
+            html = Path(build_dashboard(data, validation, Path(temp) / "dash", render_png=False)["html"]).read_text(encoding="utf-8")
+        self.assertIn("const zoomBounds=(center=", html)
+        self.assertIn("Math.min(focus*4,320)", html)
+        self.assertIn("min=\"1\" max=\"8\" step=\"0.1\"", html)
+        self.assertIn("viewMode='full-overview'", html)
+        self.assertIn("VM.overview(actual,full)", html)
+        self.assertIn("$('zoom').disabled=viewMode==='full-overview'", html)
+        self.assertIn("전체 범위 $", html)
+        self.assertIn("(full.max-full.min)/72", html)
+        self.assertNotIn("$('zoom').max=String(Math.min(32", html)
+
+    def test_actual_javascript_viewport_math_zoom_pan_clamps_and_repeats(self):
+        result = _run_viewport_js("(()=>{const d={min:1,max:2500},b={minSpan:VM.minimumUsefulSpan([{strike:178},{strike:180},{strike:182},{strike:184},{strike:186}],180),maxSpan:320};let r=VM.fit(180,80,d);const initial={...r};for(let i=0;i<100;i++){r=VM.fit((r.min+r.max)/2,VM.zoomSpan(i%2?1:8,b),d);if(!Number.isFinite(r.min)||!Number.isFinite(r.max)||r.min<=0||r.max<=r.min)throw Error('invalid zoom')}const inSpan=r.max-r.min;let left=VM.shift({min:1,max:321},-5000,d),right=VM.shift({min:2180,max:2500},5000,d);let pan={...initial};for(let i=0;i<100;i++){pan=VM.shift(pan,i%2?18:-18,d)}return {default:initial,zoomLow:VM.zoomSpan(1,b),zoomHigh:VM.zoomSpan(8,b),minUsefulSpan:b.minSpan,inSpan,left,right,pan,level:VM.zoomLevel(80,b)}})()")
+        self.assertEqual(result["default"], {"min": 140, "max": 220})
+        self.assertEqual(result["zoomLow"], 320)
+        self.assertAlmostEqual(result["zoomHigh"], result["minUsefulSpan"])
+        self.assertLessEqual(result["inSpan"], 320)
+        self.assertEqual(result["left"]["min"], 1)
+        self.assertEqual(result["right"]["max"], 2500)
+        self.assertTrue(1 <= result["pan"]["min"] < result["pan"]["max"] <= 2500)
+        self.assertTrue(1 < result["level"] < 8)
+
+    def test_actual_javascript_full_range_bins_reconcile_real_nvda_observations(self):
+        data, validation = _load_real()
+        payload = json.dumps({"rows": data["rows"], "domain": data["full_range"]}, separators=(",", ":"))
+        expr = "(()=>{const input=JSON.parse(require('fs').readFileSync(0,'utf8')),rows=input.rows,domain=input.domain,bins=VM.overview(rows,domain),keys=['call_volume_observed_sum','put_volume_observed_sum','call_oi_observed_sum','put_oi_observed_sum'];const total=a=>a.reduce((s,r)=>s+(r==null?0:r),0),step=VM.niceStep((domain.max-domain.min)/72);return {binCount:bins.length,sourceStrikeCount:new Set(rows.map(r=>r.strike)).size,binStrikeCount:new Set(bins.flatMap(b=>b.actual_strikes)).size,nearestAreReal:bins.every(b=>b.actual_strikes.includes(b.nearest_strike)),centersFinite:bins.every(b=>Number.isFinite(b.bin_center)&&b.bin_center>=domain.min&&b.bin_center<=domain.max),binStep:step,totals:Object.fromEntries(keys.map(k=>[k,{source:total(rows.map(r=>r[k])),binned:total(bins.map(r=>r[k]))}]))}})()"
+        result = _run_viewport_js(expr, payload)
+        self.assertLess(result["binCount"], 444)
+        self.assertEqual(result["sourceStrikeCount"], 444)
+        self.assertEqual(result["binStrikeCount"], 444)
+        self.assertTrue(result["nearestAreReal"])
+        self.assertTrue(result["centersFinite"])
+        self.assertEqual(result["binStep"], 50)
+        for metric, pair in result["totals"].items():
+            self.assertEqual(pair["source"], pair["binned"], metric)
+        self.assertTrue(validation["all_checks_pass"])
+
+    def test_actual_javascript_ticks_are_adaptive_and_nonuniform_strikes_use_price_axis(self):
+        result = _run_viewport_js("(()=>{const r={min:140,max:220},ticks=VM.ticks(r,500,74),x150=VM.x(150,r,58,490),x200=VM.x(200,r,58,490),domain={min:1,max:2500},outer=VM.ticks(domain,500,74),invalid=VM.x(170,{min:10,max:10},0,500);return {ticks,outer,x150,x200,invalid,finite:outer.every(t=>Number.isFinite(t.x)&&Number.isFinite(t.value)),nonduplicate:new Set(outer.map(t=>t.value)).size===outer.length}})()")
+        self.assertTrue(result["finite"])
+        self.assertTrue(result["nonduplicate"])
+        self.assertGreaterEqual(len(result["ticks"]), 2)
+        self.assertTrue(all(b["x"] - a["x"] >= 74 for a, b in zip(result["outer"], result["outer"][1:])))
+        self.assertAlmostEqual(result["x200"] - result["x150"], 490 * 50 / 80)
+        self.assertIsNone(result["invalid"])
+
+    def test_pan_zoom_preserve_selection_and_reference_transform_contract(self):
+        data, validation = _load_real()
+        with tempfile.TemporaryDirectory() as temp:
+            html = Path(build_dashboard(data, validation, Path(temp) / "dash", render_png=False)["html"]).read_text(encoding="utf-8")
+        self.assertIn("touch-action:pan-y", html)
+        self.assertIn("mode:'pending'", html)
+        self.assertIn("startSpan:range.max-range.min", html)
+        self.assertIn("gesture.mode='vertical'", html)
+        self.assertIn("gesture.mode='pan'", html)
+        self.assertIn("svg.onpointercancel=e=>clearGesture(e)", html)
+        self.assertIn("svg.onlostpointercapture", html)
+        self.assertIn("viewMode==='full-overview'", html)
+        self.assertIn("const x=xval(priceReference.price)", html)
+        self.assertIn("priceReference.price>=range.min&&priceReference.price<=range.max", html)
+        self.assertIn("function select(s){if(!S.rows.some(r=>r.strike===s))return;selected=s;renderViewport();renderSelection()}", html)
+        self.assertIn("선택 행사가가 현재 차트 범위 밖입니다", html)
+        self.assertIn("viewMode='focused';range={...initialRange}", html)
+        self.assertEqual(data["selected_strike"], 170)
 
 if __name__ == "__main__":
     unittest.main()
