@@ -45,6 +45,17 @@ def _run_quote_warning_js(expression):
     return json.loads(result.stdout)
 
 
+def _run_tooltip_position_js(expression):
+    if not shutil.which("node"):
+        raise unittest.SkipTest("Node.js unavailable; tooltip positioning helper not executed")
+    match = re.search(r"/\* TOOLTIP_POSITION_START \*/(.*?)/\* TOOLTIP_POSITION_END \*/", HTML, re.S)
+    if not match:
+        raise AssertionError("Tooltip position helper missing from dashboard HTML")
+    result = subprocess.run(["node", "-e", match.group(1) + "\nconsole.log(JSON.stringify(" + expression + "));"],
+                            check=True, text=True, capture_output=True)
+    return json.loads(result.stdout)
+
+
 class NvdaDashboardTests(unittest.TestCase):
     def test_volatility_status_is_source_derived_and_never_displays_fake_metrics(self):
         data, _ = _load_real()
@@ -88,6 +99,58 @@ class NvdaDashboardTests(unittest.TestCase):
         self.assertEqual(observed["normal"], [])
         self.assertEqual(observed["missing"], [])
         self.assertTrue(observed["unchanged"])
+
+    def test_tooltip_position_stays_inside_small_chart_and_flips_below_when_needed(self):
+        result = _run_tooltip_position_js("(()=>({right:tooltipPosition(312,120,320,250,240,92),left:tooltipPosition(1,240,320,250,210,80),top:tooltipPosition(155,4,320,250,190,90)}))()")
+        widths = {"right":240,"left":210,"top":190}
+        heights = {"right":92,"left":80,"top":90}
+        for key, pos in result.items():
+            self.assertGreaterEqual(pos["left"], 6)
+            self.assertGreaterEqual(pos["top"], 6)
+            self.assertLessEqual(pos["left"] + widths[key], 320)
+            self.assertLessEqual(pos["top"] + heights[key], 250)
+        self.assertEqual(result["top"]["top"], 16)
+
+    def test_hotfix04_compact_mobile_buttons_range_labels_and_number_formatting(self):
+        data, validation = _load_real()
+        with tempfile.TemporaryDirectory() as temp:
+            html = Path(build_dashboard(data, validation, Path(temp) / "dash", render_png=False)["html"]).read_text(encoding="utf-8")
+        self.assertIn("grid-template-columns:repeat(2,minmax(0,1fr));width:100%", html)
+        self.assertIn("white-space:nowrap", html)
+        self.assertIn("차트 표시 경계 약 ", html)
+        self.assertIn("연속 차트 경계값 ", html)
+        self.assertIn("실제 계약 행사가와 다를 수 있음", html)
+        self.assertIn("콜 '+safe(watch.call_volume_observed_sum)+' · 풋 '+safe(watch.put_volume_observed_sum)", html)
+        self.assertIn("aria-pressed',String(atInitial)", html)
+        self.assertIn("aria-pressed',String(viewMode==='full-overview')", html)
+
+    def test_volatility_details_show_korean_reason_before_internal_codes(self):
+        data, validation = _load_real()
+        with tempfile.TemporaryDirectory() as temp:
+            html = Path(build_dashboard(data, validation, Path(temp) / "dash", render_png=False)["html"]).read_text(encoding="utf-8")
+        self.assertIn("원본 데이터 미제공", html)
+        self.assertIn("계산 입력 검증 미완료", html)
+        self.assertIn("과거 IV 이력 없음", html)
+        self.assertIn("행사가별 IV 미확보", html)
+        self.assertIn("기초자산 가격 이력 미확보", html)
+        self.assertIn("<code>'+status+'</code>", html)
+        self.assertIn('<details class="panel volatility-status">', html)
+        self.assertNotIn("IV 0%", html)
+        self.assertNotIn("예상 변동폭", html)
+
+    def test_2026_11_18_strike_165_card_and_chain_values_remain_in_sync(self):
+        data, _ = _load_real()
+        contracts = [c for c in data["contracts"] if c["expiration"] == "2026-11-18" and c["strike"] == 165]
+        self.assertEqual(len(contracts), 1)
+        contract = contracts[0]
+        self.assertEqual((contract["call_volume"], contract["put_volume"], contract["call_oi"], contract["put_oi"]),
+                         (20559, 1841, 6163, 3148))
+        self.assertEqual(data["raw_sha256"], "85f6660ac4a07da061f7d2eb50080dcb40ed6203618710feb017edc55ef3d5ce")
+        with tempfile.TemporaryDirectory() as temp:
+            html = Path(build_dashboard(data, _load_real()[1], Path(temp) / "dash", render_png=False)["html"]).read_text(encoding="utf-8")
+        self.assertIn("safe(watch.call_volume_observed_sum)", html)
+        self.assertIn("select(Number(tr.dataset.strike))", html)
+        self.assertIn("classList.toggle('selected',Number(tr.dataset.strike)===selected)", html)
 
     def test_hotfix02_zoom_pan_regression_and_key_card_number_format_are_retained(self):
         data, validation = _load_real()
@@ -239,7 +302,7 @@ class NvdaDashboardTests(unittest.TestCase):
         self.assertIn("draw('volume-chart','call_volume_observed_sum','put_volume_observed_sum','volume-tooltip')", html)
         self.assertIn("draw('oi-chart','call_oi_observed_sum','put_oi_observed_sum','oi-tooltip')", html)
         self.assertIn("id=\"oi-range-note\"", html)
-        self.assertIn("공유 범위 '+money(range.min)+'–'+money(range.max)", html)
+        self.assertIn("공유 표시 경계 약 '+compact(range.min)+'–'+compact(range.max)", html)
         self.assertIn("$('reset-range').onclick=()=>{viewMode='focused';range={...initialRange};renderViewport()}", html)
         self.assertIn("$('full-range').onclick=()=>{viewMode='full-overview';range={...full};renderViewport()}", html)
 
