@@ -134,12 +134,14 @@ def run_live_batch(output_root: str | Path, *, client_factory=NasdaqClient, symb
             "error_type": result.error_type, "error_detail": result.error_detail,
             "retry_count": 0, "redirect_count": 0,
         }
-        if body is not None and result.http_status != 200:
-            base_record["error_body_path"] = str(response_dir / f"{symbol}.response")
+        if body is not None:
+            base_record["response_body_path"] = str(response_dir / f"{symbol}.response")
             try:
-                _write_body(Path(base_record["error_body_path"]), body)
+                saved_digest = _write_body(Path(base_record["response_body_path"]), body)
+                if saved_digest != base_record["response_sha256"]:
+                    raise IOError("RESPONSE_BODY_SHA256_MISMATCH")
             except OSError as exc:
-                base_record["storage_error"] = type(exc).__name__
+                base_record["response_body_storage_error"] = type(exc).__name__
         if result.http_status != 200:
             verdict = "HTTP_ACCESS_DENIED" if result.http_status == 403 else "HTTP_ERROR" if result.http_status is not None else "NETWORK_ERROR"
             if result.http_status is None and result.error_type:
