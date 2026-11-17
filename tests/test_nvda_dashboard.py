@@ -102,15 +102,85 @@ class NvdaDashboardTests(unittest.TestCase):
         self.assertEqual(len(data["rows"]), 444)
         with tempfile.TemporaryDirectory() as temp:
             html = Path(build_dashboard(data, validation, Path(temp) / "dash", render_png=False)["html"]).read_text(encoding="utf-8")
-        self.assertIn("const initialRange=isMobile&&D.mobile_initial_range", html)
+        self.assertIn("if(active==='all'&&isMobile)return {...D.mobile_initial_range}", html)
         self.assertIn("range={...initialRange}", html)
         self.assertIn("range={...full}", html)
         self.assertIn("draw('volume-chart','call_volume_observed_sum','put_volume_observed_sum','volume-tooltip')", html)
         self.assertIn("draw('oi-chart','call_oi_observed_sum','put_oi_observed_sum','oi-tooltip')", html)
         self.assertIn("id=\"oi-range-note\"", html)
-        self.assertIn("Shared strike view · $${fmt(range.min)}–$${fmt(range.max)}", html)
+        self.assertIn("Shared range $'+fmt(range.min)+'–$'+fmt(range.max)", html)
         self.assertIn("$('reset-range').onclick=()=>{range={...initialRange};render()}", html)
         self.assertIn("$('full-range').onclick=()=>{range={...full};render()}", html)
+
+    def test_raw_expiration_count_and_totalrecord_contract(self):
+        data, validation = _load_real()
+        self.assertEqual(validation["raw_total_record"], 2212)
+        self.assertEqual(validation["raw_row_count"], 2212)
+        self.assertEqual(validation["raw_expiry_header_count"], 24)
+        self.assertEqual(data["expiry_count"], 24)
+        self.assertEqual(data["contracts_count"], 2188)
+        self.assertTrue(all(validation["expiration_sums_match"].values()))
+
+    def test_expiration_groups_reconcile_to_all_expirations(self):
+        data, validation = _load_real()
+        self.assertEqual(len(data["expiration_audit"]), 24)
+        self.assertEqual(sum(x["contracts"] for x in data["expiration_audit"]), 2188)
+        for field in ("call_volume_observed_sum", "put_volume_observed_sum", "call_oi_observed_sum", "put_oi_observed_sum"):
+            key = field.replace("_observed_sum", "")
+            self.assertEqual(sum(x["observed_sums"][key] for x in data["expiration_audit"]), data["totals"][field])
+        first = data["expirations"][0]
+        subset = [x for x in data["contracts"] if x["expiration"] == first]
+        self.assertTrue(subset)
+        self.assertEqual({x["expiration"] for x in subset}, {first})
+
+    def test_chain_field_audit_preserves_missing_and_bid_ask_semantics(self):
+        data, _ = _load_real()
+        audit = data["field_audit"]
+        self.assertEqual(audit["c_Volume"]["valid_numeric_count"], 1610)
+        self.assertEqual(audit["c_Volume"]["counts"]["DASH_PLACEHOLDER"], 578)
+        self.assertEqual(audit["p_Volume"]["valid_numeric_count"], 1293)
+        self.assertEqual(audit["c_Openinterest"]["valid_numeric_count"], 2049)
+        self.assertGreater(audit["c_Bid"]["valid_numeric_count"], 0)
+        self.assertGreater(audit["p_Ask"]["valid_numeric_count"], 0)
+        self.assertEqual(audit["c_ImpliedVolatility"]["counts"]["FIELD_ABSENT"], 2188)
+        self.assertFalse(audit["c_ImpliedVolatility"]["usable"])
+
+    def test_expiration_selector_updates_every_derived_panel_and_chain(self):
+        data, validation = _load_real()
+        with tempfile.TemporaryDirectory() as temp:
+            html = Path(build_dashboard(data, validation, Path(temp) / "dash", render_png=False)["html"]).read_text(encoding="utf-8")
+        for element_id in ("expiration-filter", "kpis", "donut-volume", "donut-oi", "pcr", "oi-ratio", "coverage", "rank-grid", "key-grid", "facts", "selected-values", "chain-body"):
+            self.assertIn(f'id="{element_id}"', html)
+        self.assertIn("for(const exp of D.expirations)", html)
+        self.assertIn("selectEl.addEventListener('change',switchExpiration)", html)
+        self.assertIn("active=selectEl.value;S=stateFor(active)", html)
+        self.assertIn("const contracts=D.contracts.filter(c=>exp==='all'||c.expiration===exp)", html)
+        self.assertIn("b[k]-a[k]||a.strike-b.strike", html)
+        self.assertIn("body.querySelectorAll('tr[data-strike]')", html)
+
+    def test_mobile_chain_table_is_scrollable_and_uses_only_observed_bid_ask(self):
+        data, validation = _load_real()
+        with tempfile.TemporaryDirectory() as temp:
+            html = Path(build_dashboard(data, validation, Path(temp) / "dash", render_png=False)["html"]).read_text(encoding="utf-8")
+        self.assertIn("class=\"chain-scroll\"", html)
+        self.assertIn("overflow:auto", html)
+        self.assertIn("Call Bid", html)
+        self.assertIn("Call Ask", html)
+        self.assertNotIn("Call IV", html)
+        self.assertIn("Not observed", html)
+        self.assertIn("numeric 0, when present, is an observed zero", html)
+
+    def test_expiration_and_field_audit_outputs_are_saved_and_reopenable(self):
+        data, validation = _load_real()
+        with tempfile.TemporaryDirectory() as temp:
+            paths = build_dashboard(data, validation, Path(temp) / "dash", render_png=False)
+            expiration = json.loads(Path(paths["expiration_validation_json"]).read_text(encoding="utf-8"))
+            fields = json.loads(Path(paths["field_audit_json"]).read_text(encoding="utf-8"))
+        self.assertEqual(expiration["expiration_count"], 24)
+        self.assertTrue(expiration["passed"])
+        self.assertEqual(expiration["sum_reconciliation"], {k: True for k in expiration["sum_reconciliation"]})
+        self.assertEqual(fields["fields"]["c_Volume"]["counts"]["DASH_PLACEHOLDER"], 578)
+        self.assertEqual(fields["fields"]["c_ImpliedVolatility"]["counts"]["FIELD_ABSENT"], 2188)
 
     def test_y_axis_uses_numeric_ticks_without_rotated_title_overlap(self):
         data, validation = _load_real()
