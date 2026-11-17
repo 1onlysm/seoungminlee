@@ -312,6 +312,66 @@ class NvdaDashboardTests(unittest.TestCase):
         self.assertIn("range={...initialRange}", html)
         self.assertIn("range={...full}", html)
 
+    def test_coverage_formula_is_independent_per_raw_field_and_shows_numerator_denominator(self):
+        data, validation = _load_real()
+        rows = [row for row in data["contracts"] if row["expiration"] == "2026-11-18"]
+        self.assertEqual(len(rows), 90)
+        expected = {"call_volume": 85, "put_volume": 73, "call_oi": 85, "put_oi": 73}
+        observed_sets = {}
+        for metric, count in expected.items():
+            observed_sets[metric] = {row["strike"] for row in rows if row[metric] is not None}
+            self.assertEqual(len(observed_sets[metric]), count)
+            self.assertAlmostEqual(count / len(rows) * 100, 94.44 if count == 85 else 81.11, places=2)
+        # Equal percentages come from equal counts, not a shared paired-strike mask.
+        self.assertNotEqual(observed_sets["call_volume"], observed_sets["call_oi"])
+        self.assertNotEqual(observed_sets["put_volume"], observed_sets["put_oi"])
+        self.assertEqual(data["raw_sha256"], "85f6660ac4a07da061f7d2eb50080dcb40ed6203618710feb017edc55ef3d5ce")
+        with tempfile.TemporaryDirectory() as temp:
+            html = Path(build_dashboard(data, validation, Path(temp) / "dash", render_png=False)["html"]).read_text(encoding="utf-8")
+        self.assertIn("fmt(S.totals[x[1]+'_observed_count'])+' / '+fmt(S.contracts.length)", html)
+        self.assertIn("totals[m+'_observed_count']/contracts.length*100", html)
+
+    def test_chain_quick_navigation_uses_verified_historical_reference_and_real_rows(self):
+        data, validation = _load_real()
+        with tempfile.TemporaryDirectory() as temp:
+            html = Path(build_dashboard(data, validation, Path(temp) / "dash", render_png=False)["html"]).read_text(encoding="utf-8")
+        for label in ("참고가격 부근", "선택 행사가", "처음으로"):
+            self.assertIn(label, html)
+        self.assertIn("chain-reference-nav').disabled=!refOk", html)
+        self.assertIn("chain-selected-nav').disabled=selected==null||!S.contracts.some(c=>c.strike===selected)", html)
+        self.assertIn("검증된 과거 참고가격이 없어 참고가격 이동을 사용할 수 없습니다.", html)
+        self.assertIn("priceReference.verification_status==='HISTORICAL_REFERENCE_ONLY'", html)
+        self.assertIn("strikes.reduce((a,b)=>Math.abs(b-priceReference.price)", html)
+        self.assertIn("scrollChainToStrike(nearest)", html)
+        self.assertIn("scrollChainToStrike(selected)", html)
+        self.assertIn("scrollChainToStrike(first.strike)", html)
+        self.assertIn("box.scrollTo({top:Math.max(0,top),behavior:'smooth'})", html)
+        self.assertIn("과거 참고가격 $156.14", html)
+        self.assertNotIn("현재가 기준으로 가장 가까운 행사가", html)
+
+    def test_selected_strike_chain_sync_and_expiration_filter_are_preserved(self):
+        data, validation = _load_real()
+        with tempfile.TemporaryDirectory() as temp:
+            html = Path(build_dashboard(data, validation, Path(temp) / "dash", render_png=False)["html"]).read_text(encoding="utf-8")
+        self.assertIn("document.querySelectorAll('#chain-body tr[data-strike]')", html)
+        self.assertIn("classList.toggle('selected',Number(tr.dataset.strike)===selected)", html)
+        self.assertIn("select(Number(tr.dataset.strike))", html)
+        self.assertIn("active=selectEl.value;S=stateFor(active)", html)
+        self.assertIn("const found=S.rows.some(r=>r.strike===selected)", html)
+        self.assertIn("if(!found&&S.rows.length)selected=S.rows.reduce", html)
+        self.assertIn("id=\"center-selected\">선택 행사가로 이동", html)
+        self.assertIn("선택 행사가로 이동", html)
+
+    def test_top5_numbers_keep_thousands_separators_and_all_limitations(self):
+        data, validation = _load_real()
+        with tempfile.TemporaryDirectory() as temp:
+            html = Path(build_dashboard(data, validation, Path(temp) / "dash", render_png=False)["html"]).read_text(encoding="utf-8")
+        self.assertIn("new Intl.NumberFormat('en-US'", html)
+        for status in ("EOD_UNVERIFIED", "MISSINGNESS_CAUSE_UNKNOWN", "FULL_VOLUME_COMPLETENESS_UNVERIFIED"):
+            self.assertIn(status, html)
+        self.assertIn(".rankline b{white-space:nowrap}", html)
+        self.assertIn(".chain-scroll{overscroll-behavior:contain", html)
+
 if __name__ == "__main__":
     unittest.main()
 
