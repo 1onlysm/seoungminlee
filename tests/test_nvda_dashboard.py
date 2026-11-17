@@ -4,6 +4,7 @@ import shutil
 import subprocess
 import tempfile
 import unittest
+import csv
 from pathlib import Path
 
 from options_collector.nvda_dashboard import HTML, build_dashboard, load_verified_data, _validate_price_reference
@@ -33,7 +34,72 @@ def _run_viewport_js(expression, stdin=None):
     return json.loads(result.stdout)
 
 
+def _run_quote_warning_js(expression):
+    if not shutil.which("node"):
+        raise unittest.SkipTest("Node.js unavailable; JavaScript quote-warning logic not executed")
+    match = re.search(r"/\* QUOTE_WARNING_START \*/(.*?)/\* QUOTE_WARNING_END \*/", HTML, re.S)
+    if not match:
+        raise AssertionError("Quote warning helper missing from dashboard HTML")
+    result = subprocess.run(["node", "-e", match.group(1) + "\nconsole.log(JSON.stringify(" + expression + "));"],
+                            check=True, text=True, capture_output=True)
+    return json.loads(result.stdout)
+
+
 class NvdaDashboardTests(unittest.TestCase):
+    def test_volatility_status_is_source_derived_and_never_displays_fake_metrics(self):
+        data, _ = _load_real()
+        status = data["volatility_status"]
+        self.assertEqual(status["iv"], "SOURCE_ABSENT")
+        self.assertEqual(status["iv_fields_found"], [])
+        self.assertEqual(status["iv_calculation"], "IV_CALCULATION_BLOCKED")
+        self.assertEqual(status["iv_rank"], "IV_RANK_UNAVAILABLE")
+        self.assertEqual(status["iv_percentile"], "IV_PERCENTILE_UNAVAILABLE")
+        self.assertEqual(status["hv_rv"], "UNAVAILABLE_WITHOUT_VERIFIED_UNDERLYING_OHLC_HISTORY")
+        self.assertEqual(data["price_reference"]["price_type"], "HISTORICAL_REFERENCE")
+        with tempfile.TemporaryDirectory() as temp:
+            html = Path(build_dashboard(data, _load_real()[1], Path(temp) / "dash", render_png=False)["html"]).read_text(encoding="utf-8")
+        self.assertIn("변동성 분석 · 데이터 상태", html)
+        self.assertIn("SOURCE_ABSENT", html)
+        self.assertIn("IV_RANK_UNAVAILABLE", html)
+        self.assertNotIn("IV 0%", html)
+        self.assertNotIn("IV Rank 50", html)
+        self.assertIn("IV_CALCULATION_BLOCKED", json.dumps(data["volatility_status"]))
+
+    def test_raw_crossed_call_quote_at_160_is_preserved_and_maps_correctly(self):
+        data, _ = _load_real()
+        contract = next(c for c in data["contracts"] if c["expiration"] == "2026-11-18" and c["strike"] == 160)
+        self.assertEqual((contract["call_bid"], contract["call_ask"]), (4.95, 4.85))
+        self.assertEqual((contract["put_bid"], contract["put_ask"]), (8.60, 8.65))
+        with Path(data["source"]["contracts_csv"]).open(encoding="utf-8", newline="") as handle:
+            csv_contract = next(row for row in csv.DictReader(handle) if row["expiration"] == "2026-11-18" and float(row["strike"]) == 160)
+        raw = json.loads(csv_contract["raw_row_json"])
+        self.assertEqual((raw["c_Bid"], raw["c_Ask"], raw["p_Bid"], raw["p_Ask"]), ("4.95", "4.85", "8.60", "8.65"))
+        with tempfile.TemporaryDirectory() as temp:
+            html = Path(build_dashboard(data, _load_real()[1], Path(temp) / "dash", render_png=False)["html"]).read_text(encoding="utf-8")
+        self.assertIn("c.call_bid", html)
+        self.assertIn("c.call_ask", html)
+        self.assertIn("quoteWarnings(c).map", html)
+        self.assertIn("호가 역전 관측 — ", html)
+        self.assertIn("원본값을 유지하며 정상적인 거래 가능 호가로 보증하지 않습니다.", html)
+
+    def test_quote_warning_helper_handles_crossed_normal_missing_and_zero_without_mutation(self):
+        observed = _run_quote_warning_js("(()=>{const crossed={call_bid:4.95,call_ask:4.85,put_bid:8.6,put_ask:8.65};const before=JSON.stringify(crossed);return {crossed:quoteWarnings(crossed),normal:quoteWarnings({call_bid:1,call_ask:1.1,put_bid:0,put_ask:0.1}),missing:quoteWarnings({call_bid:null,call_ask:1}),unchanged:JSON.stringify(crossed)===before}})()")
+        self.assertEqual(observed["crossed"], [{"side":"콜","bid":4.95,"ask":4.85}])
+        self.assertEqual(observed["normal"], [])
+        self.assertEqual(observed["missing"], [])
+        self.assertTrue(observed["unchanged"])
+
+    def test_hotfix02_zoom_pan_regression_and_key_card_number_format_are_retained(self):
+        data, validation = _load_real()
+        with tempfile.TemporaryDirectory() as temp:
+            html = Path(build_dashboard(data, validation, Path(temp) / "dash", render_png=False)["html"]).read_text(encoding="utf-8")
+        self.assertIn("const zoomSpan=(level,bounds)", html)
+        self.assertIn("const ticks=(r,plotWidth,minSpacing)", html)
+        self.assertIn("touch-action:pan-y", html)
+        self.assertIn("VM.shift(gesture.startRange,delta,full)", html)
+        self.assertIn("typeof k[2]==='number'?fmt(k[2]):k[2]", html)
+        self.assertIn("과거 참고가격 $156.14", html)
+
     def test_historical_last_trade_is_not_mislabeled_as_current(self):
         data, validation = _load_real()
         ref = data["price_reference"]
