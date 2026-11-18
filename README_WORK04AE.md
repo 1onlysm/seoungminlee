@@ -41,7 +41,7 @@ HV10/HV20/HV30/HV60은 모두 **계산하지 않았습니다**. WORK 04-AB의 �
 - 실제 브라우저: 환경 제약으로 확인 불가; Galaxy: 사용자 확인 대기
 - 다음 조치: 원본 응답/선택 공급자 로그와 조정 계약, 그리고 OPTIONS LAB에서 해당 데이터를 사용할 수 있다는 제공자 권한 근거를 데이터 보유자가 제공해야 합니다. 새 요청·수집은 별도 승인 전까지 하지 않습니다.
 
-상세 JSON은 `audit_reports/work04ae_source_trace.json`, `audit_reports/work04ae_calendar_audit.json`, `audit_reports/work04ae_hv_verification.json`, `audit_reports/work04ae_data_integrity.json`, `audit_reports/work04ae_source_manifest.json`, `audit_reports/work04ae_test_report.json`에 기록했습니다.
+상세 JSON은 `audit_reports/work04ae_source_trace.json`, `audit_reports/work04ae_ohlcv_quality.json`, `audit_reports/work04ae_calendar_audit.json`, `audit_reports/work04ae_hv_verification.json`, `audit_reports/work04ae_data_integrity.json`, `audit_reports/work04ae_source_manifest.json`, `audit_reports/work04ae_test_report.json`에 기록했습니다.
 
 ### 안전 확인
 

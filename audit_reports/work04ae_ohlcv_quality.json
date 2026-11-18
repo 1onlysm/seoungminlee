@@ -1,0 +1,34 @@
+{
+  "report_id": "WORK_04AE_EMBEDDED_OHLCV_QUALITY",
+  "candidate_payload_sha256": "735c5e5dbb42b9697930373b5436c53bbfa2db143d8f59aaa6e4f853fc836f65",
+  "data_origin_status": "EMBEDDED_BUNDLE_PAYLOAD_ONLY_UPSTREAM_NOT_AUTHENTICATED",
+  "row_count": 90,
+  "date_range": {"first": "2026-04-21", "last": "2026-08-27"},
+  "field_names": ["date", "open", "high", "low", "close", "volume"],
+  "checks": {
+    "date_parseable": "PASS_90_OF_90",
+    "dates_unique": "PASS_90_OF_90",
+    "dates_strictly_increasing": "PASS",
+    "calendar_sessions": "PASS_90_OF_90; see work04ae_calendar_audit.json",
+    "ohlc_numeric_finite": "PASS_90_OF_90",
+    "ohlc_positive": "PASS_90_OF_90",
+    "ohlc_relationships": "PASS_90_OF_90",
+    "volume_numeric_finite": "PASS_90_OF_90",
+    "volume_nonnegative": "PASS_90_OF_90",
+    "missing_record_fields": 0,
+    "nonfinite_values": 0,
+    "invalid_ohlc_records": 0,
+    "negative_volume_records": 0
+  },
+  "unverified_contracts": [
+    "Exact provider selected for these rows",
+    "Original provider response bytes and response metadata",
+    "Currency and field units",
+    "Exchange/session timezone declared by provider",
+    "Raw versus split-adjusted versus dividend-adjusted price semantics",
+    "Corporate-action history and adjustment consistency",
+    "Provider entitlement and OPTIONS LAB cross-project reuse rights"
+  ],
+  "production_eligibility": "BLOCKED",
+  "interpretation": "Structural and calendar checks pass for embedded records only. These checks do not authenticate market origin or validate price-adjustment semantics."
+}
