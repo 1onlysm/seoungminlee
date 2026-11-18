@@ -1,0 +1,58 @@
+{
+  "report_id": "WORK_04AC_NVDA_OHLC_PROVENANCE",
+  "eligible_OPTIONS_LAB_history": {
+    "status": "NO_VERIFIED_REUSABLE_DATASET",
+    "verified_observation_count": 0,
+    "verified_date_range": null,
+    "adjustment_convention": null
+  },
+  "candidate_library_artifact": {
+    "name": "NVDA_NAVI-BOOT-NVDA-20260829T074538284767Z_execution_bundle.json",
+    "library_file_id": "libfile_975efb43ea588191855650a9442900bf",
+    "library_path": "/NVDA_NAVI-BOOT-NVDA-20260829T074538284767Z_execution_bundle.json",
+    "library_size_bytes": 316025,
+    "embedded_claims": {
+      "symbol": "NVDA",
+      "scope": "LIVE_RUN in separate NAVI TECH NEXT artifact",
+      "OHLCV_acquisition_as_of": "2026-08-27",
+      "acquisition_attempt_session_count": 250,
+      "embedded_raw_window_sessions": 90,
+      "embedded_window_start_claim": "2026-04-21",
+      "embedded_window_end_claim": "2026-08-27",
+      "embedded_price_authority": "RAW_OHLC_ONLY",
+      "embedded_window_sha256_claim": "735c5e5dbb42b9697930373b5436c53bbfa2db143d8f59aaa6e4f853fc836f65"
+    },
+    "provider": "not named; acquisition source recorded only as OHLCV",
+    "response_endpoint": null,
+    "currency_and_field_contract": "not established in the inspected execution-bundle metadata",
+    "adjustment_convention": "not established",
+    "corporate_action_validation": "not established",
+    "session_calendar_validation": "not established",
+    "data_reuse_rights_for_OPTIONS_LAB": "not established",
+    "artifact_sha256": null,
+    "embedded_window_sha256_recomputed": false,
+    "data_copied_to_OPTIONS_LAB": false,
+    "classification": "PRESENT_PROVENANCE_PENDING",
+    "reuse_classification": "REUSE_NOT_AUTHORIZED",
+    "reason": "The bundle indicates a prior NVDA OHLCV acquisition and embeds a 90-session window, but does not identify the provider or endpoint, adjustment basis, verified corporate-action/session treatment, or permission to reuse this separate-project data in OPTIONS LAB. The payload was not imported or used for HV."
+  },
+  "other_search_results": {
+    "OPTIONS_LAB": "WORK 04-R options snapshot, WORK 04-T aggregates, and WORK 04-AA metadata/contracts only; none is underlying daily OHLC history.",
+    "workspace_upload": "Only CDI ETF material; no NVDA OHLC.",
+    "Library": "A second NVDA execution bundle was not inspected for data use because the first candidate already failed provider/rights provenance; other returned price-history artifacts were for different instruments."
+  },
+  "options_snapshot": {
+    "path": "/workspace/scratch/navi-options-work04r-live/naviopt04r-20261117T051903Z-80a05c75/snapshots/data/options/2026-11-17/NVDA/2026-11-17T05-19-47.924836Z/raw.json",
+    "sha256_expected_and_reverified": "85f6660ac4a07da061f7d2eb50080dcb40ed6203618710feb017edc55ef3d5ce",
+    "contracts": 2188,
+    "unique_strikes": 444,
+    "expirations": 24,
+    "observed_totals": {
+      "call_volume": 1457430,
+      "put_volume": 953110,
+      "call_oi": 9839124,
+      "put_oi": 8636754
+    },
+    "historical_reference": "$156.14 as of 2026-11-16 (date-only; not an OHLC close series or synchronized spot)"
+  }
+}

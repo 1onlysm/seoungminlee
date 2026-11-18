@@ -1,0 +1,19 @@
+{
+  "report_id": "WORK_04AC_LIVE_ACQUISITION_GATE",
+  "authorized_max_requests_if_all_gates_pass": 1,
+  "actual_requests": 0,
+  "checks": {
+    "existing_approved_provider": "FAIL_NOT_CONFIRMED",
+    "NVDA_daily_OHLC_entitlement": "FAIL_NOT_CONFIRMED",
+    "approved_credentials_in_secret_path": "FAIL_NOT_CONFIRMED",
+    "endpoint_and_parameters_frozen": "FAIL_NO_APPROVED_SOURCE",
+    "schema_and_adjustment_contract_documented": "FAIL_FOR_AVAILABLE_CANDIDATE",
+    "data_rights_and_reuse_scope": "FAIL_NOT_CONFIRMED",
+    "request_budget": "PASS_LIMIT_SET_TO_ONE_BUT_UNUSED"
+  },
+  "decision": "LIVE_ACQUISITION_BLOCKED",
+  "reason": "Conditional authorization was not a blanket approval. No source, credential, NVDA history entitlement, price-adjustment contract, or data-reuse rights were verified, so no market-data request was made.",
+  "retries": 0,
+  "provider_fallbacks": 0,
+  "secret_values_read": false
+}

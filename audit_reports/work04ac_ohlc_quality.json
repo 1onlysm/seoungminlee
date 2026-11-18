@@ -1,0 +1,23 @@
+{
+  "report_id": "WORK_04AC_NVDA_OHLC_QUALITY_GATE",
+  "eligible_source_rows_imported": 0,
+  "candidate_source": "NVDA_NAVI-BOOT-NVDA-20260829T074538284767Z_execution_bundle.json",
+  "candidate_source_classification": "PRESENT_PROVENANCE_PENDING",
+  "quality_gate": {
+    "NVDA_common_stock_identity": "CLAIMED_IN_ARTIFACT_NOT_INDEPENDENTLY_VERIFIED",
+    "source_provider_and_endpoint": "MISSING",
+    "source_response_bytes_and_hash": "MISSING; only embedded 90-session payload hash claim is present",
+    "currency_and_units": "NOT_VERIFIED",
+    "date_order_and_duplicates": "NOT_RUN; candidate not imported due source/rights gate",
+    "future_dates": "NOT_RUN",
+    "positive_finite_ohlc": "NOT_RUN",
+    "low_open_close_high_relationship": "NOT_RUN",
+    "exchange_session_calendar_and_gaps": "NOT_VERIFIED",
+    "adjustment_convention": "UNKNOWN",
+    "split_and_dividend_treatment": "UNKNOWN",
+    "data_reuse_rights_for_options_lab": "NOT_CONFIRMED"
+  },
+  "eligible_observations": 0,
+  "production_hv_allowed": false,
+  "status": "BLOCKED_PROVENANCE_AND_REUSE_AUTHORIZATION"
+}

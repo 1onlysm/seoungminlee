@@ -1,0 +1,14 @@
+{
+  "report_id": "WORK_04AC_ACQUISITION_EXECUTION_LOG",
+  "mode": "CONDITIONAL_LIVE_ACQUISITION",
+  "provider": null,
+  "endpoint": null,
+  "symbol": "NVDA",
+  "requested_range": null,
+  "request_count": 0,
+  "retries": 0,
+  "fallback_requests": 0,
+  "result": "LIVE_ACQUISITION_BLOCKED",
+  "reason": "Provider identity, account entitlement, approved credential path, OHLC adjustment contract, and OPTIONS LAB reuse rights were not established. The only OHLCV candidate is a separate-project Library artifact with incomplete provenance; it was not requested, copied, parsed, or used for calculation.",
+  "secret_values_read": false
+}

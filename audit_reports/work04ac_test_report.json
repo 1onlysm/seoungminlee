@@ -1,0 +1,33 @@
+{
+  "report_id": "WORK_04AC_OFFLINE_TEST_REPORT",
+  "baseline_commit": "d8a196e18ea02026075562f2d2962433494ec39a",
+  "baseline_test_command": "python -m unittest discover -s tests -v",
+  "baseline_tests": 112,
+  "baseline_passed": 112,
+  "baseline_failed": 0,
+  "final_test_command": "python -m unittest discover -s tests -v",
+  "final_tests": 112,
+  "final_passed": 112,
+  "final_failed": 0,
+  "python_compile": {
+    "command": "python -m py_compile options_collector/historical_volatility.py tests/test_historical_volatility.py",
+    "status": "PASS"
+  },
+  "dashboard_generation": {
+    "status": "PASS",
+    "output": "/workspace/scratch/navi-options-work04ac-output/nvda_options_dashboard.html",
+    "HV_production_value_included": false
+  },
+  "generated_html_inline_javascript": {
+    "validation": "node --check after extracting the one non-JSON inline script",
+    "status": "PASS"
+  },
+  "browser_render": {
+    "status": "UNVERIFIED",
+    "chromium_exit_code": 134,
+    "reason": "socket() failed: Operation not permitted; ptrace: Operation not permitted"
+  },
+  "galaxy_device": "DEVICE_PENDING",
+  "market_data_requests": 0,
+  "github_actions": 0
+}

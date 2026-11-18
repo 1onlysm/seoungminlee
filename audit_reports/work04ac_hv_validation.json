@@ -1,0 +1,30 @@
+{
+  "report_id": "WORK_04AC_HV_VALIDATION",
+  "methodology_source": "WORK 04-AA frozen contract: options_collector/volatility_contract.json and audit_reports/work04aa_formula_contract.md",
+  "formula": "sample_stddev(log(C_t/C_(t-1)), ddof=1) * sqrt(252) * 100",
+  "annualization_factor": 252,
+  "windows_are_returns": true,
+  "required_closes": {
+    "HV10": 11,
+    "HV20": 21,
+    "HV30": 31,
+    "HV60": 61
+  },
+  "verified_eligible_observations": 0,
+  "production_calculated": false,
+  "production_displayed": false,
+  "statuses": {
+    "HV10": "BLOCKED_SOURCE_AND_REUSE_PROVENANCE",
+    "HV20": "BLOCKED_SOURCE_AND_REUSE_PROVENANCE",
+    "HV30": "BLOCKED_SOURCE_AND_REUSE_PROVENANCE",
+    "HV60": "BLOCKED_SOURCE_AND_REUSE_PROVENANCE"
+  },
+  "IV_statuses": {
+    "IV": "SOURCE_ABSENT",
+    "IV_RANK": "IV_RANK_UNAVAILABLE",
+    "IV_PERCENTILE": "IV_PERCENTILE_UNAVAILABLE",
+    "IV_SKEW": "UNAVAILABLE_WITHOUT_VERIFIED_PER_CONTRACT_IV"
+  },
+  "RV_status": "NOT_IMPLEMENTED_INTRADAY_DATA_ABSENT",
+  "dashboard_change": "NONE; existing historical-OHLC-unavailable state retained"
+}
