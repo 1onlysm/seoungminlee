@@ -407,6 +407,14 @@ HTML = r'''<!doctype html>
  <aside class="stack"><article class="panel"><div class="panel-head"><div><h2>집중 행사가 TOP 5</h2><div class="eyebrow">각 지표의 관측 합계 대비 비중</div></div></div><div class="rank-grid" id="rank-grid"></div></article><details class="panel snapshot-details"><summary><span><strong>스냅샷 세부 정보</strong><small>실행 ID · 수집 시각 · 원본 해시</small></span><b aria-hidden="true">＋</b></summary><div class="mini-grid" id="meta-grid"></div></details></aside>
 </section>
 <section class="panel chain-panel"><div class="panel-head"><div><h2>NVDA 옵션 체인 · 관측 스냅샷</h2><div class="chain-note" id="chain-note"></div></div><span class="pill">원본 관측 필드</span></div><div class="chain-nav" role="group" aria-label="옵션 체인 빠른 이동"><button id="chain-reference-nav" type="button">참고가격 부근</button><button id="chain-selected-nav" type="button" disabled>선택 행사가</button><button id="chain-first-nav" type="button">처음으로</button><span id="chain-nav-note" class="chain-nav-note">기준은 과거 참고가격 $156.14 · 현재가가 아닙니다.</span></div><div class="chain-groups" aria-hidden="true"><span>콜 데이터</span><span>행사가</span><span>풋 데이터</span></div><div class="chain-scroll"><table class="chain-table"><thead><tr class="group-head"><th colspan="4">콜</th><th>행사가</th><th colspan="4">풋</th></tr><tr><th class="metric-col">거래량</th><th class="metric-col">OI</th><th class="quote-col">Bid</th><th class="quote-col">Ask</th><th class="strike-col">행사가</th><th class="quote-col">Bid</th><th class="quote-col">Ask</th><th class="metric-col">거래량</th><th class="metric-col">OI</th></tr></thead><tbody id="chain-body"></tbody></table></div><div class="chain-legend">대시(—)·빈 값은 관측되지 않은 값이며 숫자 0과 다릅니다. 행을 누르면 해당 만기의 Bid/Ask 상세를 펼칩니다. 행사가를 선택하면 차트와 선택 정보가 함께 갱신됩니다.</div></section>
+<style>.hv-research-grid,.hv-values{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}.hv-research-grid>div,.hv-values>div{background:#0d141a;border:1px solid #26323e;border-radius:9px;padding:10px;min-width:0}.hv-research-grid small{display:block;color:var(--muted);font-size:9px}.hv-research-grid strong{display:block;overflow-wrap:anywhere;font-size:11px;margin-top:4px}.hv-values{margin-top:9px}.hv-values>div{color:var(--muted);font-size:10px}.hv-values b{display:block;color:#eef4f7;font-size:16px;font-variant-numeric:tabular-nums;margin-top:4px}.hv-bridge-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}@media(max-width:700px){.hv-research-grid,.hv-values{grid-template-columns:repeat(2,minmax(0,1fr))}}</style>
+<section class="panel hv-research-panel" id="hv-research-panel" aria-labelledby="hv-research-title">
+ <div class="panel-head"><div><h2 id="hv-research-title">Tiingo HV 연구 · 별도 데이터 레인</h2><div class="eyebrow">옵션 스냅샷과 Tiingo HV는 별도 출처·시각으로 표시합니다. HV는 방향 예측이나 IV가 아닙니다.</div></div><span class="pill">PROVISIONAL 전용</span></div>
+ <div class="hv-research-grid"><div><small>옵션 스냅샷 날짜</small><strong id="hv-options-date">확인 중</strong></div><div><small>Tiingo HV 기준일</small><strong id="hv-as-of">가져온 결과 없음</strong></div><div><small>조정 기준</small><strong id="hv-adjustment">—</strong></div><div><small>신선도</small><strong id="hv-freshness">권한 대기</strong></div></div>
+ <div class="hv-values"><div>HV10 <b id="hv10-value">—</b></div><div>HV20 <b id="hv20-value">—</b></div><div>HV30 <b id="hv30-value">—</b></div><div>HV60 <b id="hv60-value">—</b></div></div>
+ <p class="warning" id="hv-date-warning" role="status">현재 Tiingo 계정 플랜의 저장·개인 프로젝트 간 전송 권한을 확인할 수 없어 가져오기를 잠갔습니다. 샘플 값이나 옵션 스냅샷 값으로 대체하지 않습니다.</p>
+ <div class="hv-bridge-actions"><button id="hv-import-disabled" type="button" disabled>Tiingo HV 가져오기 · 권한 확인 대기</button><span class="eyebrow">스냅샷: <b id="hv-options-timestamp">—</b> · HV: <b id="hv-hv-timestamp">—</b></span></div>
+</section>
 <section class="panel keys"><div class="panel-head"><div><h2>주요 관측 행사가</h2><div class="eyebrow">관측 집중 지점이며 지지·저항 또는 매매 신호가 아닙니다</div></div></div><div class="key-grid" id="key-grid"></div></section>
 <section class="panel interpret"><div><h2>NAVI 관측 수급 해석</h2><div class="facts" id="facts"></div></div><div><h2>해석 시 유의사항</h2><p class="warning" id="interpret-range-warning">선택한 만기의 관측값이며 향후 주가 방향을 확정하지 않습니다.</p><p class="warning">풋 거래량이나 OI 집중은 자동으로 지지선이 되지 않습니다.</p><p class="warning">콜 거래량 집중은 상승 신호, 풋 거래량 집중은 하락 신호가 아닙니다.</p><p class="warning">매수·매도 방향, 현재 주가, 옵션 프리미엄, OTM/ITM 비율, GEX, 예측 확률은 표시하거나 계산하지 않았습니다.</p><p class="warning">관측 데이터는 거래 방향, 지지·저항, 딜러 포지션 또는 예측 정확도를 입증하지 않습니다.</p></div></section>
 <footer class="footer"><span>자료: 보존된 WORK 04-R NVDA 스냅샷 → WORK 04-T 행사가 집계 · 오프라인 대시보드</span><span id="source-time"></span></footer>
@@ -415,6 +423,25 @@ HTML = r'''<!doctype html>
 <script>
 (()=> {
  const D=JSON.parse(document.getElementById('dashboard-data').textContent);
+ const hvOptionsDate=document.getElementById('hv-options-date');
+ const hvOptionsStamp=document.getElementById('hv-options-timestamp');
+ const hvDateWarning=document.getElementById('hv-date-warning');
+ if(hvOptionsDate)hvOptionsDate.textContent=D.trading_date_et||'날짜 없음';
+ if(hvOptionsStamp)hvOptionsStamp.textContent=D.snapshot_timestamp_utc||'시각 없음';
+ window.NAVI_HV_RESEARCH_VIEW=Object.freeze({renderValidated(state){
+   if(!state||state.status!=='PROVISIONAL'||state.production_eligible!==false||!state.values)return false;
+   const values=state.values;
+   for(const n of [10,20,30,60])if(!Number.isFinite(values['hv'+n])||values['hv'+n]<0)return false;
+   document.getElementById('hv-as-of').textContent=state.hv_as_of_session||'날짜 없음';
+   document.getElementById('hv-adjustment').textContent=state.adjustment_basis||'조정 기준 없음';
+   document.getElementById('hv-freshness').textContent=state.freshness||'확인 불가';
+   document.getElementById('hv-hv-timestamp').textContent=state.hv_as_of_session||'날짜 없음';
+   for(const n of [10,20,30,60])document.getElementById('hv'+n+'-value').textContent=values['hv'+n].toFixed(2)+'%';
+   const mismatch=!!D.trading_date_et&&D.trading_date_et!==state.hv_as_of_session;
+   hvDateWarning.textContent=mismatch?'옵션 스냅샷 날짜와 HV 기준일이 다릅니다. 두 시점은 별도 데이터로 유지됩니다.':(state.freshness==='STALE'?'HV 데이터가 오래되었습니다. PROVISIONAL 연구값으로만 표시합니다.':'HV 결과는 PROVISIONAL 연구값이며 IV나 방향 예측이 아닙니다.');
+   hvDateWarning.dataset.mismatch=String(mismatch);return true;
+ }});
+
  const priceReference=D.price_reference||{};
  window.NAVI_DASHBOARD_DATA=D;
  const fmt=n=>n==null?'—':new Intl.NumberFormat('en-US',{maximumFractionDigits:0}).format(n);
