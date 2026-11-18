@@ -1,0 +1,89 @@
+{
+  "report_id": "WORK_04AF_PROVISIONAL_HV_RESEARCH_GATE",
+  "verdict": "PROVISIONAL_HV_RIGHTS_GATE_BLOCKED",
+  "baseline": {
+    "repository": "1onlysm/seoungminlee",
+    "source_branch": "work04ae-nvda-hv-source-authentication",
+    "source_sha": "adf1e4c5699388e4787bdcc5223ec4879ab7d4db",
+    "target_branch": "work04af-provisional-hv-research-lane",
+    "created_from_source_sha": "adf1e4c5699388e4787bdcc5223ec4879ab7d4db"
+  },
+  "candidate": {
+    "artifact_name": "NVDA_NAVI-BOOT-NVDA-20260829T074538284767Z_execution_bundle.json",
+    "recovered_actual_bytes": true,
+    "byte_count": 316025,
+    "bundle_sha256_expected": "11afaf56361858216019ac95027262e858a7d13a006b7489b2ed159ea7d9c96e",
+    "bundle_sha256_recomputed": "11afaf56361858216019ac95027262e858a7d13a006b7489b2ed159ea7d9c96e",
+    "payload_path": "execution_bundle.producer_attendance[5].output.raw_ohlcv_90d",
+    "payload_sha256_expected": "735c5e5dbb42b9697930373b5436c53bbfa2db143d8f59aaa6e4f853fc836f65",
+    "payload_sha256_recomputed": "735c5e5dbb42b9697930373b5436c53bbfa2db143d8f59aaa6e4f853fc836f65",
+    "payload_canonicalization": "UTF-8 JSON, recursively sorted keys, compact separators, ensure_ascii=false",
+    "symbol_label": "NVDA",
+    "records": 90,
+    "first_session": "2026-04-21",
+    "last_session": "2026-08-27",
+    "structural_validation": "PASS",
+    "market_authenticity": "NOT_ESTABLISHED",
+    "price_adjustment": "UNKNOWN",
+    "corporate_action_contract": "UNRESOLVED",
+    "candidate_imported_into_repository": false
+  },
+  "research_rights": {
+    "user_research_authorized": true,
+    "local_access_authorized": true,
+    "provider_entitlement_verified": false,
+    "cross_project_reuse_verified": false,
+    "redistribution_authorized": false,
+    "local_processing_permission": "NOT_VERIFIED",
+    "reason": "Exact source is not bound to the payload (Yahoo and Naver routes remain possible); original provider response, selected-provider execution evidence, account entitlement, and applicable permission are absent. Official terms reviewed restrict automated access absent applicable permission.",
+    "official_terms": [
+      "https://legal.yahoo.com/us/en/yahoo/terms/otos/index.html",
+      "https://policy.naver.com/policy/disclaimer.html",
+      "https://policy.naver.com/rules/service_en.html"
+    ]
+  },
+  "calculation": {
+    "calculation_attempted_on_candidate": false,
+    "blocked_before_calculation": true,
+    "blocking_gate": "LOCAL_RESEARCH_PERMISSION_UNVERIFIED",
+    "hv10": null,
+    "hv20": null,
+    "hv30": null,
+    "hv60": null,
+    "production_dashboard_values_emitted": 0,
+    "candidate_derived_output_committed": false,
+    "formula_contract": "ln(C_t/C_(t-1)); sample standard deviation ddof=1; sqrt(252)*100; exactly N returns from N+1 closes",
+    "as_of_if_future_research_is_authorized": "2026-08-27",
+    "warnings": [
+      "PROVISIONAL_RESEARCH_ONLY",
+      "UPSTREAM_SOURCE_UNVERIFIED",
+      "PRICE_ADJUSTMENT_UNVERIFIED",
+      "NOT_FOR_PRODUCTION",
+      "NOT_CURRENT",
+      "NOT_IMPLIED_VOLATILITY"
+    ]
+  },
+  "verified_options_snapshot": {
+    "sha256": "85f6660ac4a07da061f7d2eb50080dcb40ed6203618710feb017edc55ef3d5ce",
+    "contracts": 2188,
+    "unique_strikes": 444,
+    "expirations": 24,
+    "call_volume": 1457430,
+    "put_volume": 953110,
+    "call_oi": 9839124,
+    "put_oi": 8636754,
+    "uncertainty_labels_preserved": [
+      "PROVISIONAL",
+      "EOD_UNVERIFIED",
+      "MISSINGNESS_CAUSE_UNKNOWN",
+      "FULL_VOLUME_COMPLETENESS_UNVERIFIED"
+    ]
+  },
+  "safety": {
+    "live_market_data_requests": 0,
+    "github_actions_runs": 0,
+    "main_modifications": 0,
+    "new_providers": 0,
+    "apk_modifications": 0
+  }
+}

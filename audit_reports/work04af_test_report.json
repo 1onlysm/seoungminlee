@@ -1,0 +1,52 @@
+{
+  "report_id": "WORK_04AF_OFFLINE_REGRESSION",
+  "baseline": {
+    "source_commit": "adf1e4c5699388e4787bdcc5223ec4879ab7d4db",
+    "command": "python -m unittest discover -s tests -v",
+    "tests": 112,
+    "passed": 112,
+    "failed": 0,
+    "result": "PASS"
+  },
+  "final": {
+    "command": "python -m unittest discover -s tests -v",
+    "tests": 122,
+    "passed": 122,
+    "failed": 0,
+    "result": "PASS",
+    "new_test_module": "tests.test_provisional_hv_research",
+    "new_test_count": 10,
+    "new_test_result": "PASS"
+  },
+  "python_compile": {
+    "command": "python -m compileall -q options_collector tests",
+    "result": "PASS"
+  },
+  "candidate_actual_bytes_audit": {
+    "executed": true,
+    "result": "PASS_HASH_AND_STRUCTURE_ONLY",
+    "records": 90,
+    "first_session": "2026-04-21",
+    "last_session": "2026-08-27",
+    "candidate_hv_calculation": "NOT_RUN_RIGHTS_GATE_BLOCKED"
+  },
+  "production_options_snapshot": {
+    "sha256": "85f6660ac4a07da061f7d2eb50080dcb40ed6203618710feb017edc55ef3d5ce",
+    "result": "UNCHANGED"
+  },
+  "javascript_syntax": {
+    "command": "node --check /workspace/scratch/navi-options-work04ae-output/dashboard-inline.js",
+    "result": "PASS",
+    "scope": "Existing baseline dashboard JavaScript; dashboard source was not modified"
+  },
+  "browser_rendering": {
+    "attempted": true,
+    "command": "chromium --headless --no-sandbox --disable-gpu --disable-background-networking --host-resolver-rules='MAP * ~NOTFOUND' --dump-dom file:///workspace/scratch/navi-options-work04ae-output/nvda_options_dashboard.html",
+    "result": "UNVERIFIED_ENVIRONMENT_RESTRICTION",
+    "detail": "Chromium terminated before rendering: process-singleton socket() failed with Operation not permitted; ptrace denied. No workaround attempted."
+  },
+  "galaxy_device": "PENDING_USER_DEVICE_CHECK",
+  "candidate_derived_html_or_values_committed": false,
+  "live_market_data_requests": 0,
+  "github_actions_runs": 0
+}
