@@ -1,0 +1,22 @@
+{
+  "report_id": "WORK_04AE_EXCHANGE_CALENDAR_VALIDATION",
+  "candidate_range": {"first": "2026-04-21", "last": "2026-08-27", "records": 90},
+  "calendar": "Nasdaq U.S. equities and options market schedule, cross-checked against NYSE 2026 schedule",
+  "dates_not_present_in_candidate_that_fall_on_weekdays": [
+    {"date": "2026-05-25", "classification": "CLOSED", "holiday": "Memorial Day"},
+    {"date": "2026-06-19", "classification": "CLOSED", "holiday": "Juneteenth"},
+    {"date": "2026-07-03", "classification": "CLOSED", "holiday": "Independence Day observed"}
+  ],
+  "expected_sessions_after_weekends_and_verified_holidays": 90,
+  "candidate_sessions": 90,
+  "missing_expected_sessions": [],
+  "unexpected_candidate_sessions": [],
+  "sequence_result": "PASS_CALENDAR_SEQUENCE",
+  "source_caveat": "Calendar continuity verifies the dates in the embedded candidate only; it does not authenticate the provider, timestamps, or price values.",
+  "source_conflict_note": "A generic Nasdaq mobile calendar page displayed a conflicting July 3 early-close entry; the specific Nasdaq Trader Alert 2026-31 and NYSE annual holiday schedule state the equity/options market was closed that date. The candidate omitted July 3, consistent with the specific alert and NYSE schedule.",
+  "official_references": [
+    "https://m.nasdaqtrader.com/TraderM.aspx?id=CalendarMobile",
+    "https://www.nasdaqtrader.com/TraderNews.aspx?id=ETA2026-31",
+    "https://www.nyse.com/trade/hours-calendars"
+  ]
+}

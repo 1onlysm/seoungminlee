@@ -1,0 +1,132 @@
+{
+  "report_id": "WORK_04AE_SOURCE_TRACE_AND_RIGHTS_AUDIT",
+  "verdict": "NVDA_OHLCV_UPSTREAM_SOURCE_UNVERIFIED",
+  "baseline": {
+    "repository": "1onlysm/seoungminlee",
+    "source_branch": "work04ad-nvda-ohlcv-evidence-recovery",
+    "source_remote_head": "cf20a20cc3c062065b4bf2f6ae2c15396d7d5e26",
+    "source_parent": "31cebeafe15901430958d5c0c9e70598b4a0b734",
+    "source_tree": "4d98106fc285e06b76aec89a710b2df832c92835",
+    "target_branch": "work04ae-nvda-hv-source-authentication",
+    "target_created_from": "cf20a20cc3c062065b4bf2f6ae2c15396d7d5e26",
+    "working_tree_before_changes": "CLEAN"
+  },
+  "candidate": {
+    "library_artifact": "NVDA_NAVI-BOOT-NVDA-20260829T074538284767Z_execution_bundle.json",
+    "library_file_id": "libfile_975efb43ea588191855650a9442900bf",
+    "recovered_actual_bytes": true,
+    "byte_count": 316025,
+    "bundle_sha256_computed": "11afaf56361858216019ac95027262e858a7d13a006b7489b2ed159ea7d9c96e",
+    "bundle_sha256_expected": "11afaf56361858216019ac95027262e858a7d13a006b7489b2ed159ea7d9c96e",
+    "payload_path": "execution_bundle.producer_attendance[5].output.raw_ohlcv_90d",
+    "embedded_rows": 90,
+    "first_session": "2026-04-21",
+    "last_session": "2026-08-27",
+    "payload_sha256_computed": "735c5e5dbb42b9697930373b5436c53bbfa2db143d8f59aaa6e4f853fc836f65",
+    "payload_sha256_declared": "735c5e5dbb42b9697930373b5436c53bbfa2db143d8f59aaa6e4f853fc836f65",
+    "payload_hash_contract": "SHA-256 of compact JSON serialization with recursively sorted object keys",
+    "payload_is_original_provider_response": false,
+    "imported_into_options_lab": false
+  },
+  "source_trace": {
+    "producer": "producer_attendance[5], TECH Dashboard",
+    "attempt_record": {
+      "source": "OHLCV",
+      "status": "COMPLETE",
+      "as_of": "2026-08-27",
+      "sessions": 250,
+      "started_at": "2026-08-29T07:45:38.295335Z",
+      "completed_at": "2026-08-29T07:46:01.255308Z",
+      "selected_provider": null,
+      "endpoint": null,
+      "request_parameters": null,
+      "original_response_reference": null
+    },
+    "producer_method": "invoke canonical market adapter tech_producer on current live OHLCV; output passed through unchanged",
+    "producer_provenance_label": "DETERMINISTIC-DERIVED from SOURCE-DIRECT OHLCV",
+    "same_run_nvda_ledger": {
+      "path": "producer_attendance[10].output.discovered_ledger[0]",
+      "symbol": "NVDA",
+      "as_of": "2026-08-27",
+      "price": 227.98,
+      "source_label": "Yahoo Finance chart endpoint",
+      "directly_bound_to_90_row_payload": false
+    },
+    "historical_adapter_code": {
+      "source": "ChatGPT Library historical code version identified by canonical_resolution dependency record",
+      "path": "/NAVI/navi_execution_first_market_packet_v1_0.py",
+      "library_file_id": "libfile_4fe23021e3408191b6c640d6fec8a46a",
+      "declared_version": "2",
+      "declared_sha256": "abce7b060f8883309d1cb8aeea81e44978d25ff34c36747c7478f41310847b93",
+      "retrieved_copy_sha256": "94c9fd466cb3ddfd163d84f637f8af59d847203e28a84cf5a85a5defb515889b",
+      "hash_match": false,
+      "code_behavior_observed": {
+        "primary": "Yahoo Finance chart endpoint https://query2.finance.yahoo.com/v8/finance/chart/{symbol}",
+        "query_parameters_in_code": "range=1y, interval=1d, events=div,splits",
+        "fallback": "Naver Finance foreign chart endpoint when primary request fails",
+        "adapter_returns_selected_role_and_acquisition_metadata": true
+      },
+      "interpretation": "The code describes possible acquisition routes, but its retrieved bytes do not match the frozen dependency digest, and the TECH attempt does not preserve selected-role metadata. It does not authenticate which route supplied this exact payload."
+    },
+    "upstream_source_verdict": "UPSTREAM_SOURCE_PARTIALLY_VERIFIED",
+    "recovered_original_provider_response": false,
+    "unresolved": [
+      "The TECH attempt records only OHLCV and does not bind the payload to a provider or endpoint.",
+      "The same-run NVDA ledger says Yahoo Finance but is a separate output record, not an explicit input reference for raw_ohlcv_90d.",
+      "The adapter code includes a Naver fallback, so Yahoo cannot be uniquely selected from the preserved attempt record.",
+      "The original provider response bytes, HTTP response metadata, and request log are absent.",
+      "Retrieved adapter source bytes do not reproduce the SHA-256 declared in the bundle dependency pin."
+    ]
+  },
+  "rights_audit": {
+    "task_level_user_authorization": "READ_ONLY_DISCOVERY_AND_CONDITIONAL_OFFLINE_IMPLEMENTATION",
+    "provider_account_entitlement": "NOT_ESTABLISHED",
+    "provider_license_for_candidate": "NOT_ESTABLISHED",
+    "options_lab_cross_project_reuse": "REUSE_RIGHTS_UNVERIFIED",
+    "public_repository_redistribution": "NOT_AUTHORIZED_BY_EVIDENCE",
+    "terms_review": {
+      "candidate_likely_provider": "Yahoo, not exactly authenticated for this payload",
+      "official_terms_url": "https://legal.yahoo.com/us/en/yahoo/terms/otos/index.html",
+      "relevant_summary": "Yahoo terms state use is personal/non-transferable and restrict reproduction/distribution absent explicit written permission; this does not identify the actual source or establish an account-specific entitlement.",
+      "review_date": "2026-11-18"
+    },
+    "verdict": "REUSE_RIGHTS_UNVERIFIED",
+    "decision": "Do not copy raw candidate bytes into the repository and do not activate production HV."
+  },
+  "price_contract": {
+    "instrument_identity": "Payload is labeled NVDA; upstream instrument response absent.",
+    "exchange": "NASDAQ inferred from instrument label, not verified in source response",
+    "currency": "NOT_DECLARED",
+    "session_timezone": "Date-only records; timezone not declared",
+    "price_basis": "UNKNOWN",
+    "bundle_price_authority_label": "RAW_OHLC_ONLY; does not specify split/dividend adjustment semantics",
+    "split_adjustment": "NOT_VERIFIED",
+    "dividend_adjustment": "NOT_VERIFIED",
+    "corporate_action_history": "NOT_PRESERVED_OR_AUDITED",
+    "missing_value_policy": "No missing OHLCV field encountered in the 90 embedded records; provider-level missing-session policy unknown",
+    "production_hv_gate": "BLOCKED"
+  },
+  "external_evidence": [
+    {
+      "source": "Nasdaq Trader 2026 U.S. Equity and Options Markets Holiday Schedule",
+      "url": "https://m.nasdaqtrader.com/TraderM.aspx?id=CalendarMobile",
+      "supports": ["2026-05-25 closed", "2026-06-19 closed"]
+    },
+    {
+      "source": "Nasdaq Equity Trader Alert 2026-31",
+      "url": "https://www.nasdaqtrader.com/TraderNews.aspx?id=ETA2026-31",
+      "supports": ["Nasdaq U.S. equities and options markets closed 2026-07-03"]
+    },
+    {
+      "source": "NYSE Holidays and Trading Hours 2026 schedule",
+      "url": "https://www.nyse.com/trade/hours-calendars",
+      "supports": ["Memorial Day 2026-05-25", "Juneteenth 2026-06-19", "Independence Day observed 2026-07-03"]
+    }
+  ],
+  "activation": {
+    "production_import_gate": "FAIL",
+    "production_hv_calculation_performed": false,
+    "dashboard_hv_values_emitted": 0,
+    "reason": "Exact source binding, original response, reuse rights, price adjustment/corporate action basis, currency and source session contract remain unverified."
+  }
+}

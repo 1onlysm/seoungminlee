@@ -1,0 +1,20 @@
+{
+  "report_id": "WORK_04AE_HV_VERIFICATION",
+  "contract_source": "WORK 04-AB guarded offline historical_volatility.py",
+  "formula": "sample_stddev(ddof=1)(ln(C_t/C_(t-1)) over exactly N returns) * sqrt(252) * 100",
+  "required_closes": {"HV10": 11, "HV20": 21, "HV30": 31, "HV60": 61},
+  "candidate_embedded_closes": 90,
+  "calendar_valid_candidate_closes": 90,
+  "verified_production_eligible_closes": 0,
+  "horizons": {
+    "HV10": {"status": "BLOCKED", "numeric_value": null, "reason": "upstream source is not uniquely authenticated; reuse rights and adjustment basis unresolved"},
+    "HV20": {"status": "BLOCKED", "numeric_value": null, "reason": "upstream source is not uniquely authenticated; reuse rights and adjustment basis unresolved"},
+    "HV30": {"status": "BLOCKED", "numeric_value": null, "reason": "upstream source is not uniquely authenticated; reuse rights and adjustment basis unresolved"},
+    "HV60": {"status": "BLOCKED", "numeric_value": null, "reason": "upstream source is not uniquely authenticated; reuse rights and adjustment basis unresolved"}
+  },
+  "calculation_executed": false,
+  "candidate_end_date": "2026-08-27",
+  "candidate_is_current_as_of_2026_11_18": false,
+  "dashboard_hv_values": 0,
+  "iv_firewall": {"IV": "UNCHANGED_UNAVAILABLE", "IV_Rank": "UNCHANGED_UNAVAILABLE", "IV_Percentile": "UNCHANGED_UNAVAILABLE", "IV_Skew": "UNCHANGED_UNAVAILABLE", "GEX": "NOT_IMPLEMENTED"}
+}

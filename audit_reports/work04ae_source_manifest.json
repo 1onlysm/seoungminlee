@@ -1,0 +1,36 @@
+{
+  "manifest_id": "WORK_04AE_FINAL_SOURCE_MANIFEST",
+  "status": "CANDIDATE_AUTHENTICITY_AND_REUSE_UNVERIFIED_NO_PRODUCTION_IMPORT",
+  "candidate_artifact": {
+    "name": "NVDA_NAVI-BOOT-NVDA-20260829T074538284767Z_execution_bundle.json",
+    "library_file_id": "libfile_975efb43ea588191855650a9442900bf",
+    "sha256": "11afaf56361858216019ac95027262e858a7d13a006b7489b2ed159ea7d9c96e",
+    "payload_path": "execution_bundle.producer_attendance[5].output.raw_ohlcv_90d",
+    "payload_sha256": "735c5e5dbb42b9697930373b5436c53bbfa2db143d8f59aaa6e4f853fc836f65",
+    "records": 90,
+    "date_range": ["2026-04-21", "2026-08-27"],
+    "candidate_provider": "Yahoo is indicated by same-run separate NVDA ledger and historical adapter route; exact provider for this payload remains unverified",
+    "original_response_recovered": false,
+    "price_adjustment_basis": "UNKNOWN",
+    "reuse_rights": "REUSE_RIGHTS_UNVERIFIED",
+    "imported": false,
+    "used_for_hv": false
+  },
+  "options_snapshot": {
+    "sha256": "85f6660ac4a07da061f7d2eb50080dcb40ed6203618710feb017edc55ef3d5ce",
+    "contracts": 2188,
+    "strikes": 444,
+    "expirations": 24,
+    "call_volume": 1457430,
+    "put_volume": 953110,
+    "call_oi": 9839124,
+    "put_oi": 8636754,
+    "modified": false
+  },
+  "production_hv_values": 0,
+  "live_requests": 0,
+  "github_actions_runs": 0,
+  "main_changes": 0,
+  "new_providers": 0,
+  "apk_changes": 0
+}
