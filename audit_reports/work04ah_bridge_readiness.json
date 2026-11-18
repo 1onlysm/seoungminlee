@@ -1,0 +1,61 @@
+{
+  "work": "04-AH",
+  "verdict": "TIINGO_EXPORT_OR_RIGHTS_BLOCKED",
+  "optionsLab": {
+    "repository": "1onlysm/seoungminlee",
+    "sourceBranch": "work04af-provisional-hv-research-lane",
+    "sourceCommit": "695d531b78188cb39299dad0c76ecbfb0954af01",
+    "sourceParent": "adf1e4c5699388e4787bdcc5223ec4879ab7d4db",
+    "targetBranch": "work04ah-galaxy-tiingo-nvda-bridge",
+    "baselineTests": {
+      "command": "python -m unittest discover -s tests",
+      "passed": 122,
+      "failed": 0
+    }
+  },
+  "techNext": {
+    "repository": "1onlysm/navi-android-apk-build",
+    "inspectedBranch": "work07c-hotfix01-provisional-registration",
+    "inspectedHead": "ad5004f0d048d00ae92531c95e71a1d51a7851d1",
+    "lastGalaxyConfirmedReference": {
+      "branch": "work06ui-refinement04-safe-polish",
+      "commit": "c928a23d1f270e4545bf69e52dbd6630769517d2"
+    },
+    "existingExport": false,
+    "currentTechNextFlowCalls": [
+      "EOD_PRICES",
+      "SPLIT_COVERAGE"
+    ],
+    "currentFlowRequestCount": 2,
+    "singleRequestHvFlowImplemented": false,
+    "accountTokenAccessed": false,
+    "developmentApkBuilt": false,
+    "galaxyOperated": false
+  },
+  "rights": {
+    "appAcknowledgement": "personal_internal_analysis_no_save_or_share_raw_quotes",
+    "rawExport": "BLOCKED_BY_EXISTING_CONSENT_AND_UNVERIFIED_PROVIDER_RIGHTS",
+    "localTransientDerivedCalculation": "POSSIBLE_SUBJECT_TO_EXISTING_CONSENT_AND_PLAN_TERMS",
+    "persistentOrCrossProjectDerivedOutput": "UNKNOWN_ACCOUNT_PLAN_OR_SUPPLEMENTAL_RIGHTS"
+  },
+  "data": {
+    "liveMarketRequests": 0,
+    "galaxyRequests": 0,
+    "actualNvdaSessions": 0,
+    "hv": {
+      "HV10": null,
+      "HV20": null,
+      "HV30": null,
+      "HV60": null
+    }
+  },
+  "safety": {
+    "githubActions": 0,
+    "mainChanges": 0,
+    "newProviders": 0,
+    "apkChanges": 0,
+    "optionsSnapshotModified": false,
+    "optionsSnapshotHashRecomputed": false,
+    "previouslyAuditedOptionsSnapshotHash": "85f6660ac4a07da061f7d2eb50080dcb40ed6203618710feb017edc55ef3d5ce"
+  }
+}
