@@ -1,0 +1,117 @@
+test_01_registry_has_fourteen_unique_symbols (test_foundation.FoundationTests.test_01_registry_has_fourteen_unique_symbols) ... ok
+test_02_assetclass_split (test_foundation.FoundationTests.test_02_assetclass_split) ... ok
+test_03_per_symbol_expected_roots (test_foundation.FoundationTests.test_03_per_symbol_expected_roots) ... ok
+test_04_unknown_symbol_rejected (test_foundation.FoundationTests.test_04_unknown_symbol_rejected) ... ok
+test_05_expiry_headings_excluded (test_foundation.FoundationTests.test_05_expiry_headings_excluded) ... ok
+test_06_total_record_matches (test_foundation.FoundationTests.test_06_total_record_matches) ... ok
+test_07_missing_kinds_and_explicit_zero_separate (test_foundation.FoundationTests.test_07_missing_kinds_and_explicit_zero_separate) ... ok
+test_08_absent_field_is_not_zero (test_foundation.FoundationTests.test_08_absent_field_is_not_zero) ... ok
+test_09_adjusted_root_separated (test_foundation.FoundationTests.test_09_adjusted_root_separated) ... ok
+test_10_duplicate_contracts_detected (test_foundation.FoundationTests.test_10_duplicate_contracts_detected) ... ok
+test_11_sha256_matches_raw (test_foundation.FoundationTests.test_11_sha256_matches_raw) ... ok
+test_12_snapshot_csv_json_readback (test_foundation.FoundationTests.test_12_snapshot_csv_json_readback) ... ok
+test_13_identical_response_deduplicated (test_foundation.FoundationTests.test_13_identical_response_deduplicated) ... ok
+test_14_different_response_versions_preserved (test_foundation.FoundationTests.test_14_different_response_versions_preserved) ... ok
+test_15_write_failure_does_not_destroy_prior_snapshot (test_foundation.FoundationTests.test_15_write_failure_does_not_destroy_prior_snapshot) ... ok
+test_16_http_403_classified_without_retry (test_foundation.FoundationTests.test_16_http_403_classified_without_retry) ... ok
+test_17_http_429_classified_without_retry (test_foundation.FoundationTests.test_17_http_429_classified_without_retry) ... ok
+test_18_dns_error_classified_without_retry (test_foundation.FoundationTests.test_18_dns_error_classified_without_retry) ... ok
+test_19_timeout_classified_without_retry (test_foundation.FoundationTests.test_19_timeout_classified_without_retry) ... ok
+test_20_api_rcode_error_separate (test_foundation.FoundationTests.test_20_api_rcode_error_separate) ... ok
+test_21_invalid_json_rejected (test_foundation.FoundationTests.test_21_invalid_json_rejected) ... ok
+test_22_empty_rows_schema_flagged (test_foundation.FoundationTests.test_22_empty_rows_schema_flagged) ... ok
+test_23_eod_gate_blocks_indicators (test_foundation.FoundationTests.test_23_eod_gate_blocks_indicators) ... ok
+test_24_client_contract_no_redirect_and_headers (test_foundation.FoundationTests.test_24_client_contract_no_redirect_and_headers) ... ok
+test_http_403_is_recorded_and_batch_continues_without_retry (test_live_provisional.LiveProvisionalTests.test_http_403_is_recorded_and_batch_continues_without_retry) ... ok
+test_network_error_is_not_retried_and_other_symbols_continue (test_live_provisional.LiveProvisionalTests.test_network_error_is_not_retried_and_other_symbols_continue) ... ok
+test_one_fake_call_per_symbol_and_analytics_outputs (test_live_provisional.LiveProvisionalTests.test_one_fake_call_per_symbol_and_analytics_outputs) ... ok
+test_help_exits_without_live_runner (test_manual_refresh.ManualRefreshTests.test_help_exits_without_live_runner) ... ok
+test_invalid_arguments_exit_without_live_runner (test_manual_refresh.ManualRefreshTests.test_invalid_arguments_exit_without_live_runner) ... usage: python -m unittest [-h] --mode {live} [--confirm-live] --output-root
+                          OUTPUT_ROOT
+python -m unittest: error: the following arguments are required: --mode, --output-root
+ok
+test_manual_completion_prints_paths_and_symbol_outcomes (test_manual_refresh.ManualRefreshTests.test_manual_completion_prints_paths_and_symbol_outcomes) ... ok
+test_missing_live_confirmation_exits_without_live_runner (test_manual_refresh.ManualRefreshTests.test_missing_live_confirmation_exits_without_live_runner) ... usage: python -m unittest [-h] --mode {live} [--confirm-live] --output-root
+                          OUTPUT_ROOT
+python -m unittest: error: LIVE_REFRESH_REQUIRES_CONFIRM_LIVE
+ok
+test_run_id_collision_fails_before_client_creation (test_manual_refresh.ManualRefreshTests.test_run_id_collision_fails_before_client_creation) ... ok
+test_2026_11_18_strike_165_card_and_chain_values_remain_in_sync (test_nvda_dashboard.NvdaDashboardTests.test_2026_11_18_strike_165_card_and_chain_values_remain_in_sync) ... ok
+test_actual_javascript_full_range_bins_reconcile_real_nvda_observations (test_nvda_dashboard.NvdaDashboardTests.test_actual_javascript_full_range_bins_reconcile_real_nvda_observations) ... ok
+test_actual_javascript_ticks_are_adaptive_and_nonuniform_strikes_use_price_axis (test_nvda_dashboard.NvdaDashboardTests.test_actual_javascript_ticks_are_adaptive_and_nonuniform_strikes_use_price_axis) ... ok
+test_actual_javascript_viewport_math_zoom_pan_clamps_and_repeats (test_nvda_dashboard.NvdaDashboardTests.test_actual_javascript_viewport_math_zoom_pan_clamps_and_repeats) ... ok
+test_chain_field_audit_preserves_missing_and_bid_ask_semantics (test_nvda_dashboard.NvdaDashboardTests.test_chain_field_audit_preserves_missing_and_bid_ask_semantics) ... ok
+test_chain_is_grouped_call_strike_put_and_mobile_quotes_expand_per_contract (test_nvda_dashboard.NvdaDashboardTests.test_chain_is_grouped_call_strike_put_and_mobile_quotes_expand_per_contract) ... ok
+test_chain_quick_navigation_uses_verified_historical_reference_and_real_rows (test_nvda_dashboard.NvdaDashboardTests.test_chain_quick_navigation_uses_verified_historical_reference_and_real_rows) ... ok
+test_coverage_formula_is_independent_per_raw_field_and_shows_numerator_denominator (test_nvda_dashboard.NvdaDashboardTests.test_coverage_formula_is_independent_per_raw_field_and_shows_numerator_denominator) ... ok
+test_expiration_and_field_audit_outputs_are_saved_and_reopenable (test_nvda_dashboard.NvdaDashboardTests.test_expiration_and_field_audit_outputs_are_saved_and_reopenable) ... ok
+test_expiration_groups_reconcile_to_all_expirations (test_nvda_dashboard.NvdaDashboardTests.test_expiration_groups_reconcile_to_all_expirations) ... ok
+test_expiration_selector_updates_every_derived_panel_and_chain (test_nvda_dashboard.NvdaDashboardTests.test_expiration_selector_updates_every_derived_panel_and_chain) ... ok
+test_full_data_retained_separately_from_initial_display_range (test_nvda_dashboard.NvdaDashboardTests.test_full_data_retained_separately_from_initial_display_range) ... ok
+test_historical_last_trade_is_not_mislabeled_as_current (test_nvda_dashboard.NvdaDashboardTests.test_historical_last_trade_is_not_mislabeled_as_current) ... ok
+test_hotfix02_zoom_pan_regression_and_key_card_number_format_are_retained (test_nvda_dashboard.NvdaDashboardTests.test_hotfix02_zoom_pan_regression_and_key_card_number_format_are_retained) ... ok
+test_hotfix04_compact_mobile_buttons_range_labels_and_number_formatting (test_nvda_dashboard.NvdaDashboardTests.test_hotfix04_compact_mobile_buttons_range_labels_and_number_formatting) ... ok
+test_korean_ui_prevents_browser_translation_and_uses_financial_terms (test_nvda_dashboard.NvdaDashboardTests.test_korean_ui_prevents_browser_translation_and_uses_financial_terms) ... ok
+test_missing_is_not_imputed_to_zero (test_nvda_dashboard.NvdaDashboardTests.test_missing_is_not_imputed_to_zero) ... ok
+test_mobile_chain_table_is_scrollable_and_uses_only_observed_bid_ask (test_nvda_dashboard.NvdaDashboardTests.test_mobile_chain_table_is_scrollable_and_uses_only_observed_bid_ask) ... ok
+test_mobile_controls_have_touch_sized_targets_and_initial_range_button (test_nvda_dashboard.NvdaDashboardTests.test_mobile_controls_have_touch_sized_targets_and_initial_range_button) ... ok
+test_mobile_focused_range_is_separate_and_full_rows_remain (test_nvda_dashboard.NvdaDashboardTests.test_mobile_focused_range_is_separate_and_full_rows_remain) ... ok
+test_mobile_tap_selects_nearest_real_strike_and_drag_remains_pan (test_nvda_dashboard.NvdaDashboardTests.test_mobile_tap_selects_nearest_real_strike_and_drag_remains_pan) ... ok
+test_mobile_tick_density_and_responsive_chart_geometry (test_nvda_dashboard.NvdaDashboardTests.test_mobile_tick_density_and_responsive_chart_geometry) ... ok
+test_pan_zoom_preserve_selection_and_reference_transform_contract (test_nvda_dashboard.NvdaDashboardTests.test_pan_zoom_preserve_selection_and_reference_transform_contract) ... ok
+test_png_preview_is_rendered_from_the_validated_dataset (test_nvda_dashboard.NvdaDashboardTests.test_png_preview_is_rendered_from_the_validated_dataset) ... ok
+test_price_contract_negative_cases_and_missing_source_fallback (test_nvda_dashboard.NvdaDashboardTests.test_price_contract_negative_cases_and_missing_source_fallback) ... ok
+test_price_line_shares_strike_axis_and_is_range_conditional (test_nvda_dashboard.NvdaDashboardTests.test_price_line_shares_strike_axis_and_is_range_conditional) ... ok
+test_quote_warning_helper_handles_crossed_normal_missing_and_zero_without_mutation (test_nvda_dashboard.NvdaDashboardTests.test_quote_warning_helper_handles_crossed_normal_missing_and_zero_without_mutation) ... ok
+test_raw_crossed_call_quote_at_160_is_preserved_and_maps_correctly (test_nvda_dashboard.NvdaDashboardTests.test_raw_crossed_call_quote_at_160_is_preserved_and_maps_correctly) ... ok
+test_raw_expiration_count_and_totalrecord_contract (test_nvda_dashboard.NvdaDashboardTests.test_raw_expiration_count_and_totalrecord_contract) ... ok
+test_real_source_and_reference_numerical_contract (test_nvda_dashboard.NvdaDashboardTests.test_real_source_and_reference_numerical_contract) ... ok
+test_selected_strike_chain_sync_and_expiration_filter_are_preserved (test_nvda_dashboard.NvdaDashboardTests.test_selected_strike_chain_sync_and_expiration_filter_are_preserved) ... ok
+test_snapshot_metadata_is_collapsed_but_keeps_id_timestamp_and_hash_accessible (test_nvda_dashboard.NvdaDashboardTests.test_snapshot_metadata_is_collapsed_but_keeps_id_timestamp_and_hash_accessible) ... ok
+test_standalone_html_and_validation_files_are_created_and_not_overwritten (test_nvda_dashboard.NvdaDashboardTests.test_standalone_html_and_validation_files_are_created_and_not_overwritten) ... ok
+test_tooltip_position_stays_inside_small_chart_and_flips_below_when_needed (test_nvda_dashboard.NvdaDashboardTests.test_tooltip_position_stays_inside_small_chart_and_flips_below_when_needed) ... ok
+test_top5_matches_work04t_reference (test_nvda_dashboard.NvdaDashboardTests.test_top5_matches_work04t_reference) ... ok
+test_top5_numbers_keep_thousands_separators_and_all_limitations (test_nvda_dashboard.NvdaDashboardTests.test_top5_numbers_keep_thousands_separators_and_all_limitations) ... ok
+test_viewport_contract_caps_ordinary_zoom_and_separates_full_overview (test_nvda_dashboard.NvdaDashboardTests.test_viewport_contract_caps_ordinary_zoom_and_separates_full_overview) ... ok
+test_volatility_details_show_korean_reason_before_internal_codes (test_nvda_dashboard.NvdaDashboardTests.test_volatility_details_show_korean_reason_before_internal_codes) ... ok
+test_volatility_status_is_source_derived_and_never_displays_fake_metrics (test_nvda_dashboard.NvdaDashboardTests.test_volatility_status_is_source_derived_and_never_displays_fake_metrics) ... ok
+test_volume_and_oi_donut_ratios_are_separate_and_sum_to_100 (test_nvda_dashboard.NvdaDashboardTests.test_volume_and_oi_donut_ratios_are_separate_and_sum_to_100) ... ok
+test_y_axis_uses_numeric_ticks_without_rotated_title_overlap (test_nvda_dashboard.NvdaDashboardTests.test_y_axis_uses_numeric_ticks_without_rotated_title_overlap) ... ok
+test_missing_values_and_explicit_zero_remain_distinct (test_nvda_strike_map.NvdaStrikeMapTests.test_missing_values_and_explicit_zero_remain_distinct) ... ok
+test_output_files_csv_json_and_png_are_written (test_nvda_strike_map.NvdaStrikeMapTests.test_output_files_csv_json_and_png_are_written) ... ok
+test_same_strike_across_expirations_is_aggregated (test_nvda_strike_map.NvdaStrikeMapTests.test_same_strike_across_expirations_is_aggregated) ... ok
+test_top5_order_and_share_use_observed_sum (test_nvda_strike_map.NvdaStrikeMapTests.test_top5_order_and_share_use_observed_sum) ... ok
+test_work04r_real_csv_totals_match_reference (test_nvda_strike_map.NvdaStrikeMapTests.test_work04r_real_csv_totals_match_reference) ... ok
+test_explicit_zero_is_an_observed_value (test_provisional_analytics.ProvisionalAnalyticsTests.test_explicit_zero_is_an_observed_value) ... ok
+test_invalid_count_is_not_silently_ignored (test_provisional_analytics.ProvisionalAnalyticsTests.test_invalid_count_is_not_silently_ignored) ... ok
+test_json_and_csv_outputs_round_trip (test_provisional_analytics.ProvisionalAnalyticsTests.test_json_and_csv_outputs_round_trip) ... ok
+test_missing_placeholders_are_not_zero (test_provisional_analytics.ProvisionalAnalyticsTests.test_missing_placeholders_are_not_zero) ... ok
+test_no_contracts_has_null_coverage_and_pcr (test_provisional_analytics.ProvisionalAnalyticsTests.test_no_contracts_has_null_coverage_and_pcr) ... ok
+test_sums_coverage_and_pcr (test_provisional_analytics.ProvisionalAnalyticsTests.test_sums_coverage_and_pcr) ... ok
+test_symbols_are_aggregated_independently (test_provisional_analytics.ProvisionalAnalyticsTests.test_symbols_are_aggregated_independently) ... ok
+test_existing_analytics_comparison_matches (test_provisional_pipeline.ProvisionalPipelineTests.test_existing_analytics_comparison_matches) ... ok
+test_missing_snapshot_is_reported (test_provisional_pipeline.ProvisionalPipelineTests.test_missing_snapshot_is_reported) ... ok
+test_output_cannot_overwrite_existing_results (test_provisional_pipeline.ProvisionalPipelineTests.test_output_cannot_overwrite_existing_results) ... ok
+test_pipeline_remains_offline_and_provisional (test_provisional_pipeline.ProvisionalPipelineTests.test_pipeline_remains_offline_and_provisional) ... ok
+test_reads_snapshot_and_writes_provenance_outputs (test_provisional_pipeline.ProvisionalPipelineTests.test_reads_snapshot_and_writes_provenance_outputs) ... ok
+test_formula_contract_separates_formula_from_data_and_display_readiness (test_volatility_readiness.VolatilityReadinessTests.test_formula_contract_separates_formula_from_data_and_display_readiness) ... ok
+test_missing_placeholders_are_not_zero_and_explicit_zero_is_observed (test_volatility_readiness.VolatilityReadinessTests.test_missing_placeholders_are_not_zero_and_explicit_zero_is_observed) ... ok
+test_preserved_snapshot_integrity_and_volatility_statuses (test_volatility_readiness.VolatilityReadinessTests.test_preserved_snapshot_integrity_and_volatility_statuses) ... ok
+test_raw_contract_rows_have_quotes_and_last_but_no_iv_or_quote_time (test_volatility_readiness.VolatilityReadinessTests.test_raw_contract_rows_have_quotes_and_last_but_no_iv_or_quote_time) ... ok
+
+----------------------------------------------------------------------
+Ran 94 tests in 12.721s
+
+OK
+usage: python -m unittest [-h] --mode {live} [--confirm-live] --output-root
+                          OUTPUT_ROOT
+
+Manually refresh 14 Nasdaq option snapshots and provisional analytics
+
+options:
+  -h, --help            show this help message and exit
+  --mode {live}         This explicit command performs a live collection
+  --confirm-live        Required confirmation; without it no collection starts
+  --output-root OUTPUT_ROOT
+                        New or existing parent directory for unique run
+                        folders

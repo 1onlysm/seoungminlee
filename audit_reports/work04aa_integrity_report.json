@@ -1,0 +1,44 @@
+{
+  "reference_commit": "bc60c2078b1d4b536efb9c94feacf67482ac67d1",
+  "raw_sha256_expected": "85f6660ac4a07da061f7d2eb50080dcb40ed6203618710feb017edc55ef3d5ce",
+  "raw_sha256_actual": "85f6660ac4a07da061f7d2eb50080dcb40ed6203618710feb017edc55ef3d5ce",
+  "raw_bytes": 883552,
+  "manifest_sha256": "85f6660ac4a07da061f7d2eb50080dcb40ed6203618710feb017edc55ef3d5ce",
+  "manifest_bytes": 883552,
+  "contract_rows": 2188,
+  "unique_strikes": 444,
+  "expirations": 24,
+  "reference_observed_totals": {
+    "call_volume": 1457430,
+    "put_volume": 953110,
+    "call_oi": 9839124,
+    "put_oi": 8636754
+  },
+  "data_source": "Preserved WORK 04-R NVDA raw.json and contracts.csv; WORK 04-T aggregates checked by baseline regression loader.",
+  "missing_values_policy": "null, empty string, and -- remain unobserved; explicit numeric zero remains observed.",
+  "limitations": [
+    "EOD_UNVERIFIED",
+    "MISSINGNESS_CAUSE_UNKNOWN",
+    "FULL_VOLUME_COMPLETENESS_UNVERIFIED"
+  ],
+  "result": "PASS",
+  "observed_totals_recomputed": {
+    "call_volume_observed_sum": 1457430,
+    "put_volume_observed_sum": 953110,
+    "call_oi_observed_sum": 9839124,
+    "put_oi_observed_sum": 8636754
+  },
+  "dashboard_loader_validation_all_checks_pass": true,
+  "expiration_sum_match": {
+    "call_volume_observed_sum": true,
+    "put_volume_observed_sum": true,
+    "call_oi_observed_sum": true,
+    "put_oi_observed_sum": true
+  },
+  "top5_reference_match": {
+    "call_volume": true,
+    "put_volume": true,
+    "call_oi": true,
+    "put_oi": true
+  }
+}

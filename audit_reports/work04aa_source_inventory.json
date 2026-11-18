@@ -1,0 +1,393 @@
+{
+  "report_id": "WORK_04AA_SOURCE_INVENTORY",
+  "repository": "1onlysm/seoungminlee",
+  "reference_branch": "work04z-hotfix04-galaxy-ui-final-polish",
+  "reference_commit": "bc60c2078b1d4b536efb9c94feacf67482ac67d1",
+  "audit_scope": [
+    "reference repository tree at verified commit",
+    "preserved WORK 04-R NVDA snapshot and manifest",
+    "WORK 04-T aggregate outputs used by baseline regression tests",
+    "repository historical_evidence.json"
+  ],
+  "snapshot": {
+    "raw_path": "/workspace/scratch/navi-options-work04r-live/naviopt04r-20261117T051903Z-80a05c75/snapshots/data/options/2026-11-17/NVDA/2026-11-17T05-19-47.924836Z/raw.json",
+    "contracts_csv_path": "/workspace/scratch/navi-options-work04r-live/naviopt04r-20261117T051903Z-80a05c75/snapshots/data/options/2026-11-17/NVDA/2026-11-17T05-19-47.924836Z/contracts.csv",
+    "manifest_path": "/workspace/scratch/navi-options-work04r-live/naviopt04r-20261117T051903Z-80a05c75/snapshots/data/options/2026-11-17/NVDA/2026-11-17T05-19-47.924836Z/manifest.json",
+    "raw_sha256": "85f6660ac4a07da061f7d2eb50080dcb40ed6203618710feb017edc55ef3d5ce",
+    "raw_bytes": 883552,
+    "manifest_sha256": "85f6660ac4a07da061f7d2eb50080dcb40ed6203618710feb017edc55ef3d5ce",
+    "manifest_bytes": 883552,
+    "contract_rows": 2188,
+    "unique_strikes": 444,
+    "expirations": 24,
+    "raw_table_rows": 2212,
+    "raw_totalRecord": 2212,
+    "api_rcode": 200,
+    "collected_at_utc": "2026-11-17T05:19:47.924836Z",
+    "collected_at_et": "2026-11-17T00:19:47.924836-05:00",
+    "freshness": "EOD_UNVERIFIED"
+  },
+  "fields": {
+    "per_contract_iv": {
+      "source_file": "/workspace/scratch/navi-options-work04r-live/naviopt04r-20261117T051903Z-80a05c75/snapshots/data/options/2026-11-17/NVDA/2026-11-17T05-19-47.924836Z/raw.json",
+      "raw_keys": [
+        "c_ImpliedVolatility",
+        "p_ImpliedVolatility",
+        "ImpliedVolatility",
+        "IV",
+        "iv"
+      ],
+      "provenance": "Preserved Nasdaq response; raw contract row_json checked across all normalized contract rows",
+      "counts": {
+        "c_ImpliedVolatility": {
+          "contract_population": 2188,
+          "field_absent": 2188,
+          "json_null": 0,
+          "empty_string": 0,
+          "dash_placeholder": 0,
+          "observed_numeric": 0,
+          "explicit_zero": 0,
+          "invalid_non_numeric": 0
+        },
+        "p_ImpliedVolatility": {
+          "contract_population": 2188,
+          "field_absent": 2188,
+          "json_null": 0,
+          "empty_string": 0,
+          "dash_placeholder": 0,
+          "observed_numeric": 0,
+          "explicit_zero": 0,
+          "invalid_non_numeric": 0
+        }
+      },
+      "verdict": "SOURCE_ABSENT",
+      "reason": "No IV key exists in any of the 2,188 contract rows."
+    },
+    "bid_ask": {
+      "source_file": "/workspace/scratch/navi-options-work04r-live/naviopt04r-20261117T051903Z-80a05c75/snapshots/data/options/2026-11-17/NVDA/2026-11-17T05-19-47.924836Z/raw.json",
+      "raw_keys": [
+        "c_Bid",
+        "c_Ask",
+        "p_Bid",
+        "p_Ask"
+      ],
+      "provenance": "Nasdaq option response table headers label side-specific bid/ask; normalized CSV raw_row_json preserves source values",
+      "counts": {
+        "c_Bid": {
+          "contract_population": 2188,
+          "field_absent": 0,
+          "json_null": 0,
+          "empty_string": 0,
+          "dash_placeholder": 274,
+          "observed_numeric": 1914,
+          "explicit_zero": 0,
+          "invalid_non_numeric": 0
+        },
+        "c_Ask": {
+          "contract_population": 2188,
+          "field_absent": 0,
+          "json_null": 0,
+          "empty_string": 0,
+          "dash_placeholder": 155,
+          "observed_numeric": 2033,
+          "explicit_zero": 0,
+          "invalid_non_numeric": 0
+        },
+        "p_Bid": {
+          "contract_population": 2188,
+          "field_absent": 0,
+          "json_null": 0,
+          "empty_string": 0,
+          "dash_placeholder": 282,
+          "observed_numeric": 1906,
+          "explicit_zero": 0,
+          "invalid_non_numeric": 0
+        },
+        "p_Ask": {
+          "contract_population": 2188,
+          "field_absent": 0,
+          "json_null": 0,
+          "empty_string": 0,
+          "dash_placeholder": 156,
+          "observed_numeric": 2032,
+          "explicit_zero": 0,
+          "invalid_non_numeric": 0
+        }
+      },
+      "verdict": "VERIFIED_PRESENT",
+      "calculation_use": "Observed quote values exist but cannot be used for IV because per-contract quote timestamps, synchronized underlying, and model inputs are unavailable."
+    },
+    "last_option_trade": {
+      "source_file": "/workspace/scratch/navi-options-work04r-live/naviopt04r-20261117T051903Z-80a05c75/snapshots/data/options/2026-11-17/NVDA/2026-11-17T05-19-47.924836Z/raw.json",
+      "raw_keys": [
+        "c_Last",
+        "p_Last"
+      ],
+      "counts": {
+        "c_Last": {
+          "contract_population": 2188,
+          "field_absent": 0,
+          "json_null": 0,
+          "empty_string": 0,
+          "dash_placeholder": 74,
+          "observed_numeric": 2114,
+          "explicit_zero": 0,
+          "invalid_non_numeric": 0
+        },
+        "p_Last": {
+          "contract_population": 2188,
+          "field_absent": 0,
+          "json_null": 0,
+          "empty_string": 0,
+          "dash_placeholder": 343,
+          "observed_numeric": 1845,
+          "explicit_zero": 0,
+          "invalid_non_numeric": 0
+        }
+      },
+      "verdict": "PRESENT_BUT_UNVERIFIED",
+      "reason": "Option last-trade prices are present with placeholders, but per-contract trade timestamps and execution/quote semantics are absent."
+    },
+    "quote_timestamp": {
+      "source_file": "/workspace/scratch/navi-options-work04r-live/naviopt04r-20261117T051903Z-80a05c75/snapshots/data/options/2026-11-17/NVDA/2026-11-17T05-19-47.924836Z/raw.json",
+      "raw_keys": [
+        "quoteTimestamp",
+        "quoteTime",
+        "timestamp"
+      ],
+      "counts": {
+        "quoteTimestamp": {
+          "contract_population": 2188,
+          "field_absent": 2188,
+          "json_null": 0,
+          "empty_string": 0,
+          "dash_placeholder": 0,
+          "observed_numeric": 0,
+          "explicit_zero": 0,
+          "invalid_non_numeric": 0
+        }
+      },
+      "verdict": "SOURCE_ABSENT",
+      "reason": "No quote timestamp field in contract rows."
+    },
+    "underlying_reference_price": {
+      "source_file": "/workspace/scratch/navi-options-work04r-live/naviopt04r-20261117T051903Z-80a05c75/snapshots/data/options/2026-11-17/NVDA/2026-11-17T05-19-47.924836Z/raw.json",
+      "raw_path": "data.lastTrade",
+      "value": "LAST TRADE: $156.14 (AS OF NOV 16, 2026)",
+      "counts": {
+        "raw_type": "formatted_text",
+        "value": "LAST TRADE: $156.14 (AS OF NOV 16, 2026)",
+        "parsed_price": 156.14,
+        "date_precision": "DATE_ONLY",
+        "synchronized_with_option_snapshot": false
+      },
+      "verdict": "PRESENT_BUT_UNVERIFIED",
+      "reason": "A date-only last-trade string for 2026-11-16 is not a synchronized spot quote for the 2026-11-17 05:19:47Z option snapshot."
+    },
+    "underlying_price_timestamp": {
+      "source_file": "/workspace/scratch/navi-options-work04r-live/naviopt04r-20261117T051903Z-80a05c75/snapshots/data/options/2026-11-17/NVDA/2026-11-17T05-19-47.924836Z/raw.json",
+      "raw_path": "data.lastTrade",
+      "timestamp": "2026-11-16 (date only)",
+      "verdict": "TIMESTAMP_UNVERIFIED",
+      "reason": "No time-of-day or synchronized capture timestamp for the price observation."
+    },
+    "expiration": {
+      "source_file": "/workspace/scratch/navi-options-work04r-live/naviopt04r-20261117T051903Z-80a05c75/snapshots/data/options/2026-11-17/NVDA/2026-11-17T05-19-47.924836Z/raw.json",
+      "raw_keys": [
+        "expirygroup",
+        "expiryDate"
+      ],
+      "normalized_csv_column": "expiration",
+      "date_count": 24,
+      "verdict": "VERIFIED_PRESENT",
+      "limitation": "Expiration date is present; expiration time/time-to-expiry instant is not."
+    },
+    "strike": {
+      "source_file": "/workspace/scratch/navi-options-work04r-live/naviopt04r-20261117T051903Z-80a05c75/snapshots/data/options/2026-11-17/NVDA/2026-11-17T05-19-47.924836Z/raw.json",
+      "raw_key": "strike",
+      "normalized_csv_column": "strike",
+      "valid_contract_count": 2188,
+      "verdict": "VERIFIED_PRESENT"
+    },
+    "call_put_type": {
+      "source_file": "/workspace/scratch/navi-options-work04r-live/naviopt04r-20261117T051903Z-80a05c75/snapshots/data/options/2026-11-17/NVDA/2026-11-17T05-19-47.924836Z/raw.json",
+      "raw_keys": [
+        "c_*",
+        "p_*"
+      ],
+      "headers": {
+        "expiryDate": "Exp. Date",
+        "c_Last": "Last",
+        "c_Change": "Change",
+        "c_Bid": "Bid",
+        "c_Ask": "Ask",
+        "c_Volume": "Volume",
+        "c_Openinterest": "Open Int.",
+        "strike": "Strike",
+        "p_Last": "Last",
+        "p_Change": "Change",
+        "p_Bid": "Bid",
+        "p_Ask": "Ask",
+        "p_Volume": "Volume",
+        "p_Openinterest": "Open Int."
+      },
+      "verdict": "VERIFIED_PRESENT",
+      "limitation": "Side is represented by paired side-specific columns, not a standalone optionType field."
+    },
+    "exercise_style": {
+      "source_file": "/workspace/scratch/navi-options-work04r-live/naviopt04r-20261117T051903Z-80a05c75/snapshots/data/options/2026-11-17/NVDA/2026-11-17T05-19-47.924836Z/raw.json",
+      "raw_keys": [
+        "exerciseStyle",
+        "exercise_style"
+      ],
+      "verdict": "SOURCE_ABSENT"
+    },
+    "dividend_inputs": {
+      "source_file": "/workspace/scratch/navi-options-work04r-live/naviopt04r-20261117T051903Z-80a05c75/snapshots/data/options/2026-11-17/NVDA/2026-11-17T05-19-47.924836Z/raw.json",
+      "raw_keys": [
+        "dividend",
+        "dividendYield",
+        "dividendSchedule"
+      ],
+      "verdict": "SOURCE_ABSENT"
+    },
+    "risk_free_rate": {
+      "source_file": "/workspace/scratch/navi-options-work04r-live/naviopt04r-20261117T051903Z-80a05c75/snapshots/data/options/2026-11-17/NVDA/2026-11-17T05-19-47.924836Z/raw.json",
+      "raw_keys": [
+        "riskFreeRate",
+        "risk_free_rate"
+      ],
+      "verdict": "SOURCE_ABSENT"
+    },
+    "underlying_ohlc_history": {
+      "source_file": "Reference repository tree and preserved WORK 04-R evidence set",
+      "verdict": "SOURCE_ABSENT",
+      "reason": "No authorized NVDA OHLC history file or OHLC collection exists in the reference repository or preserved WORK 04-R input set. historical_evidence.json is metadata only and explicitly contains no raw responses."
+    },
+    "historical_iv_series": {
+      "source_file": "Reference repository tree and preserved WORK 04-R evidence set",
+      "verdict": "SOURCE_ABSENT",
+      "reason": "No historical IV observations or per-contract IV series are present."
+    },
+    "volume_and_open_interest": {
+      "source_file": "/workspace/scratch/navi-options-work04r-live/naviopt04r-20261117T051903Z-80a05c75/snapshots/data/options/2026-11-17/NVDA/2026-11-17T05-19-47.924836Z/raw.json",
+      "raw_keys": [
+        "c_Volume",
+        "p_Volume",
+        "c_Openinterest",
+        "p_Openinterest"
+      ],
+      "counts": {
+        "c_Volume": {
+          "contract_population": 2188,
+          "field_absent": 0,
+          "json_null": 0,
+          "empty_string": 0,
+          "dash_placeholder": 578,
+          "observed_numeric": 1610,
+          "explicit_zero": 0,
+          "invalid_non_numeric": 0
+        },
+        "p_Volume": {
+          "contract_population": 2188,
+          "field_absent": 0,
+          "json_null": 0,
+          "empty_string": 0,
+          "dash_placeholder": 895,
+          "observed_numeric": 1293,
+          "explicit_zero": 0,
+          "invalid_non_numeric": 0
+        },
+        "c_Openinterest": {
+          "contract_population": 2188,
+          "field_absent": 0,
+          "json_null": 0,
+          "empty_string": 0,
+          "dash_placeholder": 139,
+          "observed_numeric": 2049,
+          "explicit_zero": 0,
+          "invalid_non_numeric": 0
+        },
+        "p_Openinterest": {
+          "contract_population": 2188,
+          "field_absent": 0,
+          "json_null": 0,
+          "empty_string": 0,
+          "dash_placeholder": 603,
+          "observed_numeric": 1585,
+          "explicit_zero": 0,
+          "invalid_non_numeric": 0
+        }
+      },
+      "verdict": "VERIFIED_PRESENT",
+      "units": "Observed option contract counts; values are not dollar volume or directional buy/sell flow.",
+      "missingness": "--, null, empty, and absent remain unobserved; numeric zero is counted separately."
+    }
+  },
+  "integrity": {
+    "expected_raw_sha256": "85f6660ac4a07da061f7d2eb50080dcb40ed6203618710feb017edc55ef3d5ce",
+    "actual_raw_sha256": "85f6660ac4a07da061f7d2eb50080dcb40ed6203618710feb017edc55ef3d5ce",
+    "sha256_match": true,
+    "contracts": 2188,
+    "unique_strikes": 444,
+    "expirations": 24,
+    "observed_totals_recomputed": {
+      "call_volume_observed_sum": 1457430,
+      "put_volume_observed_sum": 953110,
+      "call_oi_observed_sum": 9839124,
+      "put_oi_observed_sum": 8636754
+    },
+    "loader_validation_all_checks_pass": true
+  },
+  "raw_schema": {
+    "table_headers": {
+      "expiryDate": "Exp. Date",
+      "c_Last": "Last",
+      "c_Change": "Change",
+      "c_Bid": "Bid",
+      "c_Ask": "Ask",
+      "c_Volume": "Volume",
+      "c_Openinterest": "Open Int.",
+      "strike": "Strike",
+      "p_Last": "Last",
+      "p_Change": "Change",
+      "p_Bid": "Bid",
+      "p_Ask": "Ask",
+      "p_Volume": "Volume",
+      "p_Openinterest": "Open Int."
+    },
+    "contract_row_keys": [
+      "_expiration",
+      "_expiry_group",
+      "_root",
+      "_root_class",
+      "_route_side",
+      "_source_row_index",
+      "_strike_raw",
+      "_strike_valid",
+      "_strike_value",
+      "c_Ask",
+      "c_Bid",
+      "c_Change",
+      "c_Last",
+      "c_Openinterest",
+      "c_Volume",
+      "c_colour",
+      "drillDownURL",
+      "expiryDate",
+      "expirygroup",
+      "p_Ask",
+      "p_Bid",
+      "p_Change",
+      "p_Last",
+      "p_Openinterest",
+      "p_Volume",
+      "p_colour",
+      "strike",
+      "strikePrice"
+    ],
+    "raw_table_rows": 2212,
+    "normalized_contract_rows": 2188,
+    "expiration_group_heading_rows": 24
+  }
+}

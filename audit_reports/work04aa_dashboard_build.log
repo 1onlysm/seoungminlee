@@ -1,0 +1,292 @@
+{
+  "result": "NVDA_REAL_DASHBOARD_RENDER_UNVERIFIED",
+  "html": "/workspace/scratch/navi-options-work04aa-output/nvda_options_dashboard.html",
+  "png": null,
+  "data_json": "/workspace/scratch/navi-options-work04aa-output/nvda_dashboard_data.json",
+  "validation_json": "/workspace/scratch/navi-options-work04aa-output/nvda_dashboard_validation.json",
+  "expiration_validation_json": "/workspace/scratch/navi-options-work04aa-output/expiration_aggregation_validation.json",
+  "field_audit_json": "/workspace/scratch/navi-options-work04aa-output/options_chain_field_audit.json",
+  "price_source_audit_json": "/workspace/scratch/navi-options-work04aa-output/price_source_audit.json",
+  "price_data_contract_json": "/workspace/scratch/navi-options-work04aa-output/price_data_contract.json",
+  "browser_rendered": false,
+  "png_rendered_from_verified_data": false,
+  "validation": {
+    "raw_sha256": "85f6660ac4a07da061f7d2eb50080dcb40ed6203618710feb017edc55ef3d5ce",
+    "raw_bytes": 883552,
+    "manifest_sha256_match": true,
+    "manifest_contract_count": 2188,
+    "csv_contract_count": 2188,
+    "computed_strike_count": 444,
+    "source_t_json_rows": 444,
+    "snapshot_batch_run_id": "naviopt04r-20261117T051903Z-80a05c75",
+    "batch_nvda_sha256_match": true,
+    "strike_rows_match_work04t_json": true,
+    "strike_csvs_match_recalculation": true,
+    "reference_totals_match": {
+      "contracts": true,
+      "strike_count": true,
+      "call_volume_observed_sum": true,
+      "put_volume_observed_sum": true,
+      "call_oi_observed_sum": true,
+      "put_oi_observed_sum": true
+    },
+    "top5_match_work04t_reference": {
+      "call_volume": true,
+      "put_volume": true,
+      "call_oi": true,
+      "put_oi": true
+    },
+    "expiration_count": 24,
+    "expiration_sums_match": {
+      "call_volume_observed_sum": true,
+      "put_volume_observed_sum": true,
+      "call_oi_observed_sum": true,
+      "put_oi_observed_sum": true
+    },
+    "raw_total_record": 2212,
+    "raw_row_count": 2212,
+    "raw_expiry_header_count": 24,
+    "field_audit": {
+      "strike": {
+        "raw_field": "strike",
+        "counts": {
+          "OBSERVED_NUMERIC": 2188,
+          "EXPLICIT_ZERO": 0,
+          "DASH_PLACEHOLDER": 0,
+          "EMPTY_STRING": 0,
+          "JSON_NULL": 0,
+          "FIELD_ABSENT": 0,
+          "NON_NUMERIC_INVALID": 0
+        },
+        "valid_numeric_count": 2188,
+        "missing_count": 0,
+        "usable": true
+      },
+      "c_Volume": {
+        "raw_field": "c_Volume",
+        "counts": {
+          "OBSERVED_NUMERIC": 1610,
+          "EXPLICIT_ZERO": 0,
+          "DASH_PLACEHOLDER": 578,
+          "EMPTY_STRING": 0,
+          "JSON_NULL": 0,
+          "FIELD_ABSENT": 0,
+          "NON_NUMERIC_INVALID": 0
+        },
+        "valid_numeric_count": 1610,
+        "missing_count": 578,
+        "usable": true
+      },
+      "p_Volume": {
+        "raw_field": "p_Volume",
+        "counts": {
+          "OBSERVED_NUMERIC": 1293,
+          "EXPLICIT_ZERO": 0,
+          "DASH_PLACEHOLDER": 895,
+          "EMPTY_STRING": 0,
+          "JSON_NULL": 0,
+          "FIELD_ABSENT": 0,
+          "NON_NUMERIC_INVALID": 0
+        },
+        "valid_numeric_count": 1293,
+        "missing_count": 895,
+        "usable": true
+      },
+      "c_Openinterest": {
+        "raw_field": "c_Openinterest",
+        "counts": {
+          "OBSERVED_NUMERIC": 2049,
+          "EXPLICIT_ZERO": 0,
+          "DASH_PLACEHOLDER": 139,
+          "EMPTY_STRING": 0,
+          "JSON_NULL": 0,
+          "FIELD_ABSENT": 0,
+          "NON_NUMERIC_INVALID": 0
+        },
+        "valid_numeric_count": 2049,
+        "missing_count": 139,
+        "usable": true
+      },
+      "p_Openinterest": {
+        "raw_field": "p_Openinterest",
+        "counts": {
+          "OBSERVED_NUMERIC": 1585,
+          "EXPLICIT_ZERO": 0,
+          "DASH_PLACEHOLDER": 603,
+          "EMPTY_STRING": 0,
+          "JSON_NULL": 0,
+          "FIELD_ABSENT": 0,
+          "NON_NUMERIC_INVALID": 0
+        },
+        "valid_numeric_count": 1585,
+        "missing_count": 603,
+        "usable": true
+      },
+      "c_Bid": {
+        "raw_field": "c_Bid",
+        "counts": {
+          "OBSERVED_NUMERIC": 1914,
+          "EXPLICIT_ZERO": 0,
+          "DASH_PLACEHOLDER": 274,
+          "EMPTY_STRING": 0,
+          "JSON_NULL": 0,
+          "FIELD_ABSENT": 0,
+          "NON_NUMERIC_INVALID": 0
+        },
+        "valid_numeric_count": 1914,
+        "missing_count": 274,
+        "usable": true
+      },
+      "c_Ask": {
+        "raw_field": "c_Ask",
+        "counts": {
+          "OBSERVED_NUMERIC": 2033,
+          "EXPLICIT_ZERO": 0,
+          "DASH_PLACEHOLDER": 155,
+          "EMPTY_STRING": 0,
+          "JSON_NULL": 0,
+          "FIELD_ABSENT": 0,
+          "NON_NUMERIC_INVALID": 0
+        },
+        "valid_numeric_count": 2033,
+        "missing_count": 155,
+        "usable": true
+      },
+      "p_Bid": {
+        "raw_field": "p_Bid",
+        "counts": {
+          "OBSERVED_NUMERIC": 1906,
+          "EXPLICIT_ZERO": 0,
+          "DASH_PLACEHOLDER": 282,
+          "EMPTY_STRING": 0,
+          "JSON_NULL": 0,
+          "FIELD_ABSENT": 0,
+          "NON_NUMERIC_INVALID": 0
+        },
+        "valid_numeric_count": 1906,
+        "missing_count": 282,
+        "usable": true
+      },
+      "p_Ask": {
+        "raw_field": "p_Ask",
+        "counts": {
+          "OBSERVED_NUMERIC": 2032,
+          "EXPLICIT_ZERO": 0,
+          "DASH_PLACEHOLDER": 156,
+          "EMPTY_STRING": 0,
+          "JSON_NULL": 0,
+          "FIELD_ABSENT": 0,
+          "NON_NUMERIC_INVALID": 0
+        },
+        "valid_numeric_count": 2032,
+        "missing_count": 156,
+        "usable": true
+      },
+      "c_Last": {
+        "raw_field": "c_Last",
+        "counts": {
+          "OBSERVED_NUMERIC": 2114,
+          "EXPLICIT_ZERO": 0,
+          "DASH_PLACEHOLDER": 74,
+          "EMPTY_STRING": 0,
+          "JSON_NULL": 0,
+          "FIELD_ABSENT": 0,
+          "NON_NUMERIC_INVALID": 0
+        },
+        "valid_numeric_count": 2114,
+        "missing_count": 74,
+        "usable": false
+      },
+      "c_Change": {
+        "raw_field": "c_Change",
+        "counts": {
+          "OBSERVED_NUMERIC": 1533,
+          "EXPLICIT_ZERO": 0,
+          "DASH_PLACEHOLDER": 655,
+          "EMPTY_STRING": 0,
+          "JSON_NULL": 0,
+          "FIELD_ABSENT": 0,
+          "NON_NUMERIC_INVALID": 0
+        },
+        "valid_numeric_count": 1533,
+        "missing_count": 655,
+        "usable": false
+      },
+      "p_Last": {
+        "raw_field": "p_Last",
+        "counts": {
+          "OBSERVED_NUMERIC": 1845,
+          "EXPLICIT_ZERO": 0,
+          "DASH_PLACEHOLDER": 343,
+          "EMPTY_STRING": 0,
+          "JSON_NULL": 0,
+          "FIELD_ABSENT": 0,
+          "NON_NUMERIC_INVALID": 0
+        },
+        "valid_numeric_count": 1845,
+        "missing_count": 343,
+        "usable": false
+      },
+      "p_Change": {
+        "raw_field": "p_Change",
+        "counts": {
+          "OBSERVED_NUMERIC": 1249,
+          "EXPLICIT_ZERO": 0,
+          "DASH_PLACEHOLDER": 939,
+          "EMPTY_STRING": 0,
+          "JSON_NULL": 0,
+          "FIELD_ABSENT": 0,
+          "NON_NUMERIC_INVALID": 0
+        },
+        "valid_numeric_count": 1249,
+        "missing_count": 939,
+        "usable": false
+      },
+      "c_ImpliedVolatility": {
+        "raw_field": "c_ImpliedVolatility",
+        "counts": {
+          "OBSERVED_NUMERIC": 0,
+          "EXPLICIT_ZERO": 0,
+          "DASH_PLACEHOLDER": 0,
+          "EMPTY_STRING": 0,
+          "JSON_NULL": 0,
+          "FIELD_ABSENT": 2188,
+          "NON_NUMERIC_INVALID": 0
+        },
+        "valid_numeric_count": 0,
+        "missing_count": 2188,
+        "usable": false
+      },
+      "p_ImpliedVolatility": {
+        "raw_field": "p_ImpliedVolatility",
+        "counts": {
+          "OBSERVED_NUMERIC": 0,
+          "EXPLICIT_ZERO": 0,
+          "DASH_PLACEHOLDER": 0,
+          "EMPTY_STRING": 0,
+          "JSON_NULL": 0,
+          "FIELD_ABSENT": 2188,
+          "NON_NUMERIC_INVALID": 0
+        },
+        "valid_numeric_count": 0,
+        "missing_count": 2188,
+        "usable": false
+      },
+      "expiration": {
+        "raw_field": "expirygroup + expiryDate → normalized expiration",
+        "valid_date_count": 2188,
+        "missing_count": 0,
+        "usable": true
+      },
+      "symbol": {
+        "raw_field": "CSV symbol",
+        "valid_symbol_count": 2188,
+        "missing_count": 0,
+        "usable": true
+      }
+    },
+    "price_reference_status": "HISTORICAL_REFERENCE_ONLY",
+    "price_reference_source_field": "data.lastTrade",
+    "all_checks_pass": true
+  }
+}

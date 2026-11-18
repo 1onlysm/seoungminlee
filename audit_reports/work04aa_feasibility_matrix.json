@@ -1,0 +1,133 @@
+{
+  "report_id": "WORK_04AA_VOLATILITY_FEASIBILITY",
+  "statuses": {
+    "FORMULA_SPECIFIED": "Mathematical definition documented; not evidence of data availability.",
+    "DATA_READY": "All required inputs and provenance verified.",
+    "IMPLEMENTATION_READY": "Calculation implementation tested against the frozen contract.",
+    "PRODUCTION_DISPLAY_READY": "Inputs, calculation, freshness and limitations validated for display."
+  },
+  "note": "No indicator is production-display-ready. Formula existence is kept separate from data readiness and implementation readiness.",
+  "indicators": [
+    {
+      "indicator": "Per-contract IV",
+      "required_data": "Validated option price/quote, synchronized underlying, T, rate, dividends, exercise model, solver",
+      "existing_verified_data": "Bid/Ask and Last only; no IV or quote timestamp",
+      "missing_requirements": "Synchronized spot, expiration time, rates/dividends, exercise style/model and quote-quality/time contract",
+      "formula_status": "FORMULA_SPECIFIED",
+      "data_status": "DATA_BLOCKED",
+      "implementation_status": "NOT_IMPLEMENTED_FOR_PRODUCTION",
+      "production_display_status": "NOT_READY",
+      "verdict": "CALCULATION_BLOCKED"
+    },
+    {
+      "indicator": "ATM IV",
+      "required_data": "Verified per-contract IV and declared ATM selection methodology",
+      "existing_verified_data": "No verified IV; historical-only $156.14 reference",
+      "missing_requirements": "Verified current/synchronized spot, IV values, ATM selection and coverage policy",
+      "formula_status": "METHODOLOGY_INCOMPLETE",
+      "data_status": "DATA_BLOCKED",
+      "implementation_status": "NOT_IMPLEMENTED_FOR_PRODUCTION",
+      "production_display_status": "NOT_READY",
+      "verdict": "UNAVAILABLE"
+    },
+    {
+      "indicator": "IV Rank",
+      "required_data": "Comparable current/historical IV series, fixed lookback/sample policy",
+      "existing_verified_data": "No IV series",
+      "missing_requirements": "Canonical current IV, comparable time series, lookback, minimum samples, tie/flat-range policy",
+      "formula_status": "FORMULA_SPECIFIED",
+      "data_status": "DATA_BLOCKED",
+      "implementation_status": "NOT_IMPLEMENTED_FOR_PRODUCTION",
+      "production_display_status": "NOT_READY",
+      "verdict": "IV_RANK_UNAVAILABLE"
+    },
+    {
+      "indicator": "IV Percentile",
+      "required_data": "Comparable current/historical IV series, fixed lookback/sample policy",
+      "existing_verified_data": "No IV series",
+      "missing_requirements": "Canonical current IV, comparable time series, lookback, minimum samples, tie convention",
+      "formula_status": "FORMULA_SPECIFIED",
+      "data_status": "DATA_BLOCKED",
+      "implementation_status": "NOT_IMPLEMENTED_FOR_PRODUCTION",
+      "production_display_status": "NOT_READY",
+      "verdict": "IV_PERCENTILE_UNAVAILABLE"
+    },
+    {
+      "indicator": "IV Skew",
+      "required_data": "Validated per-contract IV, same expiry, strike/delta methodology",
+      "existing_verified_data": "No IV fields",
+      "missing_requirements": "Per-contract IV plus frozen strike- or delta-based definition and quote-quality rules",
+      "formula_status": "METHODOLOGY_INCOMPLETE",
+      "data_status": "DATA_BLOCKED",
+      "implementation_status": "NOT_IMPLEMENTED_FOR_PRODUCTION",
+      "production_display_status": "NOT_READY",
+      "verdict": "IV_SKEW_UNAVAILABLE_WITHOUT_VERIFIED_PER_CONTRACT_IV"
+    },
+    {
+      "indicator": "IV Term Structure",
+      "required_data": "Comparable expiration-level IV summaries and tenor method",
+      "existing_verified_data": "No verified IV",
+      "missing_requirements": "Per-contract IV, consistent expiration summary, comparable tenor methodology",
+      "formula_status": "METHODOLOGY_INCOMPLETE",
+      "data_status": "DATA_BLOCKED",
+      "implementation_status": "NOT_IMPLEMENTED_FOR_PRODUCTION",
+      "production_display_status": "NOT_READY",
+      "verdict": "UNAVAILABLE_WITHOUT_COMPARABLE_VERIFIED_EXPIRATION_IV"
+    },
+    {
+      "indicator": "HV10",
+      "required_data": "11 consecutive verified closes and complete trading sessions",
+      "existing_verified_data": "No authorized OHLC history",
+      "missing_requirements": "Provenance, adjustment convention, session calendar, 11 closes",
+      "formula_status": "FORMULA_SPECIFIED",
+      "data_status": "DATA_BLOCKED",
+      "implementation_status": "NOT_IMPLEMENTED_FOR_PRODUCTION",
+      "production_display_status": "NOT_READY",
+      "verdict": "UNAVAILABLE_WITHOUT_VERIFIED_UNDERLYING_OHLC_HISTORY"
+    },
+    {
+      "indicator": "HV20",
+      "required_data": "21 consecutive verified closes and complete trading sessions",
+      "existing_verified_data": "No authorized OHLC history",
+      "missing_requirements": "Provenance, adjustment convention, session calendar, 21 closes",
+      "formula_status": "FORMULA_SPECIFIED",
+      "data_status": "DATA_BLOCKED",
+      "implementation_status": "NOT_IMPLEMENTED_FOR_PRODUCTION",
+      "production_display_status": "NOT_READY",
+      "verdict": "UNAVAILABLE_WITHOUT_VERIFIED_UNDERLYING_OHLC_HISTORY"
+    },
+    {
+      "indicator": "HV30",
+      "required_data": "31 consecutive verified closes and complete trading sessions",
+      "existing_verified_data": "No authorized OHLC history",
+      "missing_requirements": "Provenance, adjustment convention, session calendar, 31 closes",
+      "formula_status": "FORMULA_SPECIFIED",
+      "data_status": "DATA_BLOCKED",
+      "implementation_status": "NOT_IMPLEMENTED_FOR_PRODUCTION",
+      "production_display_status": "NOT_READY",
+      "verdict": "UNAVAILABLE_WITHOUT_VERIFIED_UNDERLYING_OHLC_HISTORY"
+    },
+    {
+      "indicator": "HV60",
+      "required_data": "61 consecutive verified closes and complete trading sessions",
+      "existing_verified_data": "No authorized OHLC history",
+      "missing_requirements": "Provenance, adjustment convention, session calendar, 61 closes",
+      "formula_status": "FORMULA_SPECIFIED",
+      "data_status": "DATA_BLOCKED",
+      "implementation_status": "NOT_IMPLEMENTED_FOR_PRODUCTION",
+      "production_display_status": "NOT_READY",
+      "verdict": "UNAVAILABLE_WITHOUT_VERIFIED_UNDERLYING_OHLC_HISTORY"
+    },
+    {
+      "indicator": "Intraday RV",
+      "required_data": "Verified intraday observations, sampling interval, session/overnight policy",
+      "existing_verified_data": "No intraday underlying data",
+      "missing_requirements": "Provenance, cadence, session policy, missingness policy, annualization contract",
+      "formula_status": "FORMULA_SPECIFIED",
+      "data_status": "DATA_BLOCKED",
+      "implementation_status": "NOT_IMPLEMENTED_FOR_PRODUCTION",
+      "production_display_status": "NOT_READY",
+      "verdict": "UNAVAILABLE_WITHOUT_VERIFIED_INTRADAY_DATA"
+    }
+  ]
+}

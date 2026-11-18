@@ -1,0 +1,85 @@
+{
+  "contract_id": "NAVI_OPTIONS_VOLATILITY_INPUTS",
+  "version": 1,
+  "symbol": "NVDA",
+  "observation_policy": {
+    "missing_tokens": [null, "", "--"],
+    "missing_is_zero": false,
+    "explicit_numeric_zero_is_observed": true,
+    "snapshot_status": "PROVISIONAL",
+    "limitations": [
+      "EOD_UNVERIFIED",
+      "MISSINGNESS_CAUSE_UNKNOWN",
+      "FULL_VOLUME_COMPLETENESS_UNVERIFIED"
+    ]
+  },
+  "formulas": {
+    "per_contract_iv": {
+      "definition": "Find sigma >= 0 such that a contract-appropriate option pricing model price(S,K,T,r,q,sigma,exercise_style) equals a validated observed option price.",
+      "formula_specified": true,
+      "model_selected": false,
+      "production_calculation_allowed": false,
+      "required_inputs": [
+        "validated_option_price_and_quote_quality",
+        "option_quote_timestamp",
+        "synchronized_underlying_price_and_timestamp",
+        "expiration_timestamp_and_time_to_expiry",
+        "validated_risk_free_rate_curve",
+        "dividend_contract_or_schedule",
+        "exercise_style_appropriate_pricing_model",
+        "arbitrage_bounds_and_solver_convergence_checks"
+      ],
+      "blocked_reasons": [
+        "No per-contract IV field exists in the preserved response.",
+        "Option quote timestamps are absent.",
+        "No synchronized underlying spot observation is present.",
+        "Expiration time, validated rate/dividend inputs, and exercise-model contract are absent."
+      ]
+    },
+    "iv_rank": {
+      "definition": "(current_iv - historical_min_iv) / (historical_max_iv - historical_min_iv) * 100",
+      "formula_specified": true,
+      "tie_policy": "Not applicable.",
+      "equal_min_max_policy": "Undefined; return unavailable rather than divide by zero.",
+      "production_calculation_allowed": false,
+      "required_inputs": ["canonical_current_iv", "comparable_historical_iv_series", "declared_lookback_and_minimum_sample"]
+    },
+    "iv_percentile": {
+      "definition": "count(historical_iv < current_iv) / count(valid_historical_iv) * 100",
+      "formula_specified": true,
+      "tie_policy": "Strict-less-than; historical values equal to current IV are not counted below it.",
+      "production_calculation_allowed": false,
+      "required_inputs": ["canonical_current_iv", "comparable_historical_iv_series", "declared_lookback_and_minimum_sample"]
+    },
+    "historical_volatility": {
+      "definition": "For N consecutive verified close-to-close log returns r_t=ln(C_t/C_(t-1)), sample_stddev(r) * sqrt(252).",
+      "formula_specified": true,
+      "annualization_factor": 252,
+      "annualization_factor_type": "CONVENTIONAL_ASSUMPTION",
+      "minimum_close_observations": "N + 1 consecutive verified trading-session closes",
+      "windows": [10, 20, 30, 60],
+      "missing_session_policy": "Reject the window unless every expected trading session is verified; do not bridge missing sessions.",
+      "production_calculation_allowed": false,
+      "required_inputs": ["provenance_verified_nvda_ohlc", "consistent_adjustment_convention", "verified_session_calendar", "complete_window_closes"]
+    },
+    "intraday_realized_volatility": {
+      "definition": "sqrt(sum of squared intraday log returns under a declared sampling interval and overnight-session policy), annualization only if the sampling contract specifies it.",
+      "formula_specified": true,
+      "production_calculation_allowed": false,
+      "required_inputs": ["provenance_verified_intraday_prices", "sampling_interval", "session_and_overnight_policy", "missing_observation_policy"]
+    },
+    "iv_skew": {
+      "definition": "Not frozen: requires a declared strike-based or delta-based skew definition and comparable verified per-contract IV observations.",
+      "formula_specified": false,
+      "production_calculation_allowed": false,
+      "required_inputs": ["verified_per_contract_iv", "same_expiration_alignment", "moneyness_or_delta_method", "quote_quality_and_coverage_policy"]
+    },
+    "iv_term_structure": {
+      "definition": "Compare expiration-level IV summaries only after one consistent contract-selection and tenor methodology is frozen.",
+      "formula_specified": false,
+      "production_calculation_allowed": false,
+      "required_inputs": ["verified_per_contract_iv", "comparable_expiration_summaries", "consistent_tenor_methodology"]
+    }
+  },
+  "production_policy": "A known formula does not make an indicator data-ready, implementation-ready, or display-ready. Missing required inputs keep the metric unavailable; no placeholder number is emitted."
+}

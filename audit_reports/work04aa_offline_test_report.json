@@ -1,0 +1,21 @@
+{
+  "command": "python -m unittest discover -s tests -v",
+  "status": "PASS",
+  "tests_ran": 94,
+  "baseline_tests_passed_before_change": 90,
+  "new_tests": 4,
+  "py_compile": "PASS",
+  "javascript_syntax": "PASS",
+  "standalone_html_generated": "PASS",
+  "browser_rendering": "BROWSER_RENDER_UNVERIFIED",
+  "browser_reason": "Chromium UI automation blocked by unavailable AT-SPI provider; headless Chromium failed with socket() and ptrace operation not permitted. Sandbox protections were not relaxed.",
+  "galaxy_device": "DEVICE_PENDING",
+  "raw_sha256": "85f6660ac4a07da061f7d2eb50080dcb40ed6203618710feb017edc55ef3d5ce",
+  "live_market_api_requests": 0,
+  "github_actions_runs": 0,
+  "main_branch_changes": 0,
+  "new_providers": 0,
+  "apk_changes": 0,
+  "output_log": "audit_reports/work04aa_unittest.log",
+  "dashboard_path": "/workspace/scratch/navi-options-work04aa-output/nvda_options_dashboard.html"
+}
