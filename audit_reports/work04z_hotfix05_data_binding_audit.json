@@ -1,0 +1,264 @@
+{
+  "task": "WORK 04-Z HOTFIX 05",
+  "baseline": {
+    "source_branch": "work04z-hotfix04-galaxy-ui-final-polish",
+    "source_commit": "bc60c2078b1d4b536efb9c94feacf67482ac67d1",
+    "target_branch": "work04z-hotfix05-data-binding-integrity"
+  },
+  "snapshot": {
+    "sha256": "85f6660ac4a07da061f7d2eb50080dcb40ed6203618710feb017edc55ef3d5ce",
+    "expected_sha256": "85f6660ac4a07da061f7d2eb50080dcb40ed6203618710feb017edc55ef3d5ce",
+    "bytes": 883552,
+    "contract_csv_rows": 2188,
+    "raw_rows": 2212,
+    "totalRecord": 2212,
+    "expiration_count": 24,
+    "unique_strike_count": 444
+  },
+  "incident": {
+    "reported_tooltip": {
+      "displayed_strike": "$158",
+      "values": {
+        "call_volume": 815,
+        "put_volume": 755,
+        "call_oi": 1392,
+        "put_oi": 6755
+      },
+      "reported_expiration_count": 24
+    },
+    "reported_selection_card": {
+      "displayed_strike": "$158",
+      "selected_expiration": "2026-11-18",
+      "values": {
+        "call_volume": 11767,
+        "put_volume": 10824,
+        "call_oi": 1074,
+        "put_oi": 5337
+      }
+    },
+    "source_recalculation": {
+      "nov18_strike_157_5": {
+        "strike": 157.5,
+        "scope": "2026-11-18",
+        "contract_rows": 1,
+        "actual_expirations_present": [
+          "2026-11-18"
+        ],
+        "actual_expiration_count": 1,
+        "observed_sums": {
+          "call_volume": 11767,
+          "put_volume": 10824,
+          "call_oi": 1074,
+          "put_oi": 5337
+        },
+        "rows": [
+          {
+            "expiration": "2026-11-18",
+            "call_volume": 11767.0,
+            "put_volume": 10824.0,
+            "call_oi": 1074.0,
+            "put_oi": 5337.0
+          }
+        ]
+      },
+      "all_expirations_strike_157_5": {
+        "strike": 157.5,
+        "scope": "all expirations",
+        "contract_rows": 6,
+        "actual_expirations_present": [
+          "2026-11-18",
+          "2026-11-20",
+          "2026-11-23",
+          "2026-11-25",
+          "2026-11-27",
+          "2026-12-04"
+        ],
+        "actual_expiration_count": 6,
+        "observed_sums": {
+          "call_volume": 22845,
+          "put_volume": 19811,
+          "call_oi": 3397,
+          "put_oi": 10005
+        },
+        "rows": [
+          {
+            "expiration": "2026-11-18",
+            "call_volume": 11767.0,
+            "put_volume": 10824.0,
+            "call_oi": 1074.0,
+            "put_oi": 5337.0
+          },
+          {
+            "expiration": "2026-11-20",
+            "call_volume": 6318.0,
+            "put_volume": 6281.0,
+            "call_oi": 1037.0,
+            "put_oi": 3342.0
+          },
+          {
+            "expiration": "2026-11-23",
+            "call_volume": 1632.0,
+            "put_volume": 1327.0,
+            "call_oi": 194.0,
+            "put_oi": 754.0
+          },
+          {
+            "expiration": "2026-11-25",
+            "call_volume": 1157.0,
+            "put_volume": 146.0,
+            "call_oi": 57.0,
+            "put_oi": 138.0
+          },
+          {
+            "expiration": "2026-11-27",
+            "call_volume": 1222.0,
+            "put_volume": 779.0,
+            "call_oi": 1035.0,
+            "put_oi": 434.0
+          },
+          {
+            "expiration": "2026-12-04",
+            "call_volume": 749.0,
+            "put_volume": 454.0,
+            "call_oi": null,
+            "put_oi": null
+          }
+        ]
+      },
+      "all_expirations_strike_158": {
+        "strike": 158.0,
+        "scope": "all expirations",
+        "contract_rows": 1,
+        "actual_expirations_present": [
+          "2026-12-18"
+        ],
+        "actual_expiration_count": 1,
+        "observed_sums": {
+          "call_volume": 815,
+          "put_volume": 755,
+          "call_oi": 1392,
+          "put_oi": 6755
+        },
+        "rows": [
+          {
+            "expiration": "2026-12-18",
+            "call_volume": 815.0,
+            "put_volume": 755.0,
+            "call_oi": 1392.0,
+            "put_oi": 6755.0
+          }
+        ]
+      }
+    },
+    "confirmed_code_causes": [
+      "Strike labels used an integer-only formatter, so actual $157.50 and $158.00 contracts were both shown as $158.",
+      "The tooltip element was outside the SVG and was not hidden when the expiration state and chart were rerendered, allowing a previous-scope tooltip to remain visible.",
+      "Each all-expiration strike row was assigned the global target expiration count (24), not the number of expirations that actually contained that strike."
+    ],
+    "interpretation": "The two value sets are not the same strike/scope. The card values are the 2026-11-18 $157.50 contract, rounded to $158. The tooltip values exactly match the $158.00 contract in 2026-12-18; that strike exists in one expiration, despite the prior tooltip showing 24. The old overlay can survive a rerender, so stale tooltip state is the code-supported explanation for the screenshot. The screenshot event sequence itself was not independently replayed in a browser."
+  },
+  "expiration_2026_11_18": {
+    "contract_rows": 90,
+    "unique_strikes": 90,
+    "field_audit": {
+      "call_volume": {
+        "eligible_contract_rows": 90,
+        "observed_numeric_count": 85,
+        "missing_count": 5,
+        "explicit_zero_count": 0,
+        "observed_sum": 297644,
+        "coverage_pct": 94.4444,
+        "denominator": "contract rows in selected expiration scope"
+      },
+      "put_volume": {
+        "eligible_contract_rows": 90,
+        "observed_numeric_count": 73,
+        "missing_count": 17,
+        "explicit_zero_count": 0,
+        "observed_sum": 232846,
+        "coverage_pct": 81.1111,
+        "denominator": "contract rows in selected expiration scope"
+      },
+      "call_oi": {
+        "eligible_contract_rows": 90,
+        "observed_numeric_count": 85,
+        "missing_count": 5,
+        "explicit_zero_count": 0,
+        "observed_sum": 171626,
+        "coverage_pct": 94.4444,
+        "denominator": "contract rows in selected expiration scope"
+      },
+      "put_oi": {
+        "eligible_contract_rows": 90,
+        "observed_numeric_count": 73,
+        "missing_count": 17,
+        "explicit_zero_count": 0,
+        "observed_sum": 143622,
+        "coverage_pct": 81.1111,
+        "denominator": "contract rows in selected expiration scope"
+      }
+    }
+  },
+  "all_expirations_field_audit": {
+    "call_volume": {
+      "eligible_contract_rows": 2188,
+      "observed_numeric_count": 1610,
+      "missing_count": 578,
+      "explicit_zero_count": 0,
+      "observed_sum": 1457430,
+      "coverage_pct": 73.5832,
+      "denominator": "contract rows in selected expiration scope"
+    },
+    "put_volume": {
+      "eligible_contract_rows": 2188,
+      "observed_numeric_count": 1293,
+      "missing_count": 895,
+      "explicit_zero_count": 0,
+      "observed_sum": 953110,
+      "coverage_pct": 59.0951,
+      "denominator": "contract rows in selected expiration scope"
+    },
+    "call_oi": {
+      "eligible_contract_rows": 2188,
+      "observed_numeric_count": 2049,
+      "missing_count": 139,
+      "explicit_zero_count": 0,
+      "observed_sum": 9839124,
+      "coverage_pct": 93.6472,
+      "denominator": "contract rows in selected expiration scope"
+    },
+    "put_oi": {
+      "eligible_contract_rows": 2188,
+      "observed_numeric_count": 1585,
+      "missing_count": 603,
+      "explicit_zero_count": 0,
+      "observed_sum": 8636754,
+      "coverage_pct": 72.4406,
+      "denominator": "contract rows in selected expiration scope"
+    }
+  },
+  "changes": {
+    "precision_strike_label_max_fraction_digits": 2,
+    "tooltip_cleared_before_chart_redraw": true,
+    "tooltip_shows_aggregation_scope": true,
+    "tooltip_shows_actual_strike_or_bin_scope_count": true,
+    "actual_expirations_per_strike": true,
+    "raw_contract_data_modified": false
+  },
+  "verification": {
+    "baseline_tests": "41/41 passed",
+    "after_tests": "43/43 passed",
+    "python_compile": "PASS",
+    "generated_html_js_node_check": "PASS",
+    "browser_render": "UNVERIFIED",
+    "galaxy_device": "DEVICE_PENDING"
+  },
+  "safety": {
+    "live_market_requests": 0,
+    "github_actions_runs": 0,
+    "main_changes": 0,
+    "new_providers": 0,
+    "apk_changes": 0,
+    "raw_snapshot_modifications": 0
+  }
+}

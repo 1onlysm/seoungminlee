@@ -1,0 +1,13 @@
+{
+  "baseline_test_count": 41,
+  "baseline_passed": 41,
+  "new_test_count": 2,
+  "final_test_count": 43,
+  "final_passed": 43,
+  "failed": 0,
+  "command": "python -m unittest discover -s tests -v",
+  "python_compile": "PASS",
+  "generated_html_javascript_node_check": "PASS",
+  "browser_render": "UNVERIFIED",
+  "galaxy_device": "DEVICE_PENDING"
+}

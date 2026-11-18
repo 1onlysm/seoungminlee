@@ -56,7 +56,45 @@ def _run_tooltip_position_js(expression):
     return json.loads(result.stdout)
 
 
+def _run_data_binding_js(expression, contracts):
+    if not shutil.which("node"):
+        raise unittest.SkipTest("Node.js unavailable; JavaScript data-binding helpers not executed")
+    match = re.search(r"/\* DATA_BINDING_START \*/(.*?)/\* DATA_BINDING_END \*/", HTML, re.S)
+    if not match:
+        raise AssertionError("Data-binding helper block missing from dashboard HTML")
+    script = match.group(1) + "\nconst input=JSON.parse(require('fs').readFileSync(0,'utf8'));console.log(JSON.stringify(" + expression + "));"
+    result = subprocess.run(["node", "-e", script], input=json.dumps(contracts), check=True, text=True, capture_output=True)
+    return json.loads(result.stdout)
+
+
 class NvdaDashboardTests(unittest.TestCase):
+    def test_hotfix05_strike_labels_preserve_half_dollar_identity_and_expiration_counts(self):
+        data, _ = _load_real()
+        nov18_1575 = next(c for c in data["contracts"] if c["expiration"] == "2026-11-18" and c["strike"] == 157.5)
+        all_1575 = [c for c in data["contracts"] if c["strike"] == 157.5]
+        all_158 = [c for c in data["contracts"] if c["strike"] == 158.0]
+        self.assertEqual((nov18_1575["call_volume"], nov18_1575["put_volume"], nov18_1575["call_oi"], nov18_1575["put_oi"]), (11767, 10824, 1074, 5337))
+        self.assertEqual(len({c["expiration"] for c in all_1575}), 6)
+        self.assertEqual(len({c["expiration"] for c in all_158}), 1)
+        self.assertEqual(tuple(sum(c[k] or 0 for c in all_158) for k in ("call_volume", "put_volume", "call_oi", "put_oi")), (815, 755, 1392, 6755))
+        result = _run_data_binding_js(
+            "(()=>{const counts=strikeExpirationCounts(input);return {label1575:strikeFmt(157.5),label158:strikeFmt(158),count1575:counts.get(157.5),count158:counts.get(158)}})()",
+            data["contracts"],
+        )
+        self.assertEqual(result, {"label1575": "157.5", "label158": "158", "count1575": 6, "count158": 1})
+
+    def test_hotfix05_scope_and_tooltip_state_are_explicit_and_stale_tips_clear(self):
+        data, validation = _load_real()
+        with tempfile.TemporaryDirectory() as temp:
+            html = Path(build_dashboard(data, validation, Path(temp) / "dash", render_png=False)["html"]).read_text(encoding="utf-8")
+        self.assertIn("expirationCounts.get(c.strike)||0", html)
+        self.assertIn("전체 만기 합산 · 대상 ", html)
+        self.assertIn("해당 행사가 관측 만기", html)
+        self.assertIn("요약 구간 ", html)
+        self.assertIn("function renderViewport(){hideTip('volume-tooltip');hideTip('oi-tooltip');", html)
+        self.assertIn("$'+strikeFmt(selected)", html)
+        self.assertIn("$'+strikeFmt(c.strike)", html)
+
     def test_volatility_status_is_source_derived_and_never_displays_fake_metrics(self):
         data, _ = _load_real()
         status = data["volatility_status"]
@@ -585,4 +623,5 @@ class NvdaDashboardTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
 
