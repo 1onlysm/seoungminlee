@@ -1,0 +1,25 @@
+{
+  "report_id": "WORK_04AD_EMBEDDED_OHLCV_STRUCTURAL_QUALITY",
+  "candidate_payload_sha256": "735c5e5dbb42b9697930373b5436c53bbfa2db143d8f59aaa6e4f853fc836f65",
+  "observed_rows": 90,
+  "date_range": {"first": "2026-04-21", "last": "2026-08-27"},
+  "checks": {
+    "parseable_iso_dates": "PASS_90_OF_90",
+    "unique_dates": "PASS_90_OF_90",
+    "strictly_increasing_dates": "PASS",
+    "future_dates_relative_to_2026_11_18": "NONE",
+    "OHLC_finite_positive": "PASS_90_OF_90",
+    "OHLC_relationships": "PASS_90_OF_90",
+    "volume_numeric_nonnegative": "PASS_90_OF_90",
+    "zero_volume_records": 0,
+    "exchange_calendar_completeness": "NOT_VERIFIED",
+    "weekday_dates_absent_from_embedded_rows": ["2026-05-25", "2026-06-19", "2026-07-03"],
+    "interpretation_of_absent_weekdays": "Not classified against an authoritative exchange calendar in this work; no completeness claim is made.",
+    "split_dividend_adjustment_consistency": "NOT_VERIFIED",
+    "price_adjustment_basis": "UNKNOWN",
+    "currency_units": "NOT_VERIFIED",
+    "corporate_action_events": "NOT_AUDITED"
+  },
+  "gate_status": "STRUCTURAL_CHECKS_PASS_BUT_PRODUCTION_ELIGIBILITY_FAILS_PROVENANCE_RIGHTS_ADJUSTMENT_AND_CALENDAR_GATES",
+  "imported_or_modified": false
+}

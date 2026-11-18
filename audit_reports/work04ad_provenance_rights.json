@@ -1,0 +1,26 @@
+{
+  "report_id": "WORK_04AD_PROVENANCE_AND_REUSE_RIGHTS",
+  "provenance_verdict": "PROVENANCE_PARTIAL",
+  "reuse_rights_verdict": "REUSE_RIGHTS_UNVERIFIED",
+  "required_gates": {
+    "NVDA_symbol": {"status": "PRESENT_BUT_UNVERIFIED", "evidence": "bundle ticker and row context label NVDA; no upstream instrument response preserved"},
+    "historical_daily_OHLCV": {"status": "PRESENT_BUT_UNVERIFIED", "evidence": "90 embedded records contain date/open/high/low/close/volume"},
+    "provider_identified": {"status": "SOURCE_ABSENT", "evidence": "source field is only OHLCV"},
+    "endpoint_or_collection_mechanism": {"status": "SOURCE_ABSENT", "evidence": "no URL, endpoint, adapter identity/version, or request parameters in candidate metadata"},
+    "collection_timestamp": {"status": "PRESENT_BUT_UNVERIFIED", "evidence": "attempt timestamps are in the bundle, but cannot be tied to an identified source"},
+    "exchange_session_semantics": {"status": "CONTRACT_INCOMPLETE", "evidence": "date-only records; authoritative exchange calendar not validated"},
+    "price_adjustment_and_corporate_actions": {"status": "CONTRACT_INCOMPLETE", "evidence": "no split/dividend adjustment declaration or factor; RAW_OHLC_ONLY does not define adjustment basis"},
+    "currency_and_units": {"status": "CONTRACT_INCOMPLETE", "evidence": "not declared in the inspected candidate metadata"},
+    "original_provider_bytes": {"status": "SOURCE_ABSENT", "evidence": "only the downstream execution bundle with embedded rows was accessible"},
+    "authentic_production_evidence": {"status": "PRESENT_BUT_UNVERIFIED", "evidence": "bundle asserts LIVE_RUN and SOURCE-DIRECT but source chain cannot be independently reproduced"},
+    "OPTIONS_LAB_reuse_permission": {"status": "REUSE_RIGHTS_UNVERIFIED", "evidence": "no explicit cross-project license, entitlement, or user authorization record found"}
+  },
+  "TECH_NEXT_code_observation": {
+    "provider": "Tiingo",
+    "endpoint_pattern": "https://api.tiingo.com/tiingo/daily/{symbol}/prices?startDate={start}&endDate={end}&resampleFreq=daily&format=json",
+    "rights_control": "source code requires a personal-use acknowledgment and stored token before requests",
+    "relation_to_candidate": "cannot establish that this candidate came from Tiingo; does not grant OPTIONS LAB reuse rights"
+  },
+  "production_import_gate": "FAIL",
+  "decision": "DO_NOT_IMPORT_OR_ACTIVATE_HV"
+}

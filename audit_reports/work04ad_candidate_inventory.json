@@ -1,0 +1,41 @@
+{
+  "report_id": "WORK_04AD_CROSS_PROJECT_CANDIDATE_INVENTORY",
+  "status": "COMPLETE_READ_ONLY_DISCOVERY",
+  "candidate": {
+    "name": "NVDA_NAVI-BOOT-NVDA-20260829T074538284767Z_execution_bundle.json",
+    "location": "ChatGPT Library native file; inspected from a read-only downloaded copy in scratch",
+    "library_file_id": "libfile_975efb43ea588191855650a9442900bf",
+    "repository": null,
+    "branch": null,
+    "actual_bundle_bytes_recovered": true,
+    "format": "JSON execution bundle with embedded raw_ohlcv_90d array",
+    "bundle_size_bytes": 316025,
+    "bundle_sha256": "11afaf56361858216019ac95027262e858a7d13a006b7489b2ed159ea7d9c96e",
+    "embedded_row_count": 90,
+    "first_session": "2026-04-21",
+    "last_session": "2026-08-27",
+    "embedded_record_fields": ["date", "open", "high", "low", "close", "volume"],
+    "provider_attribution": "not named; acquisition source is recorded as OHLCV",
+    "endpoint_or_acquisition_method": "not established; metadata says current live OHLCV was consumed by a market adapter",
+    "collection_timestamp_claim": "2026-08-29T07:45:38.295335Z to 2026-08-29T07:46:01.255308Z",
+    "price_adjustment_semantics": "not documented; RAW_OHLC_ONLY is an authority label, not a split-adjustment contract",
+    "reuse_rights": "not documented for OPTIONS LAB",
+    "classification": "PRESENT_PROVENANCE_PENDING",
+    "production_vs_fixture": "artifact claims LIVE_RUN / SOURCE-DIRECT, but authenticity cannot be independently authenticated; not treated as verified production evidence",
+    "decision": "not imported; no HV calculation"
+  },
+  "repository_search": {
+    "repository": "1onlysm/navi-android-apk-build",
+    "branches_inspected": [
+      {"ref": "work06ui-refinement04-safe-polish", "commit": "c928a23d1f270e4545bf69e52dbd6630769517d2", "finding": "no NVDA OHLCV history file in recursive tree; app source includes Tiingo request path and rights acknowledgment"},
+      {"ref": "work07c-dynamic-symbol-integration", "commit": "6b19c4f8c0e3dfb2619b6022ebd0004fddeb05a1", "finding": "no NVDA OHLCV history file in recursive tree"},
+      {"ref": "work07c-hotfix01", "commit": "ad5004f0d048d00ae92531c95e71a1d51a7851d1", "finding": "no NVDA OHLCV history file in recursive tree; replay CSVs are SOXL/KORU test evidence, not NVDA price history"}
+    ],
+    "committed_NVDA_history_found": false,
+    "cross_project_source_modified": false
+  },
+  "other_candidates": [
+    {"source": "OPTIONS LAB preserved Nasdaq options snapshot", "classification": "NOT_OHLC_HISTORY", "reason": "option contracts plus a date-only historical lastTrade reference; not daily underlying OHLC"},
+    {"source": "TECH NEXT price_map_replay.csv", "classification": "TEST_OR_REPLAY_EVIDENCE_ONLY", "reason": "rows inspected are SOXL/KORU summaries and contain no NVDA daily OHLC series"}
+  ]
+}

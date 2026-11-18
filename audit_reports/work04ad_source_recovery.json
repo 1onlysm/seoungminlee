@@ -1,0 +1,18 @@
+{
+  "report_id": "WORK_04AD_ORIGINAL_SOURCE_RECOVERY",
+  "actual_embedded_candidate_bytes_recovered": true,
+  "original_upstream_response_bytes_recovered": false,
+  "candidate_location": "ChatGPT Library file NVDA_NAVI-BOOT-NVDA-20260829T074538284767Z_execution_bundle.json",
+  "bundle_sha256_computed_from_downloaded_bytes": "11afaf56361858216019ac95027262e858a7d13a006b7489b2ed159ea7d9c96e",
+  "bundle_size_bytes": 316025,
+  "embedded_payload_path": "execution_bundle.producer_attendance[5].output.raw_ohlcv_90d",
+  "embedded_payload_actual_rows": 90,
+  "embedded_payload_date_range": {"first": "2026-04-21", "last": "2026-08-27"},
+  "embedded_payload_declared_sha256": "735c5e5dbb42b9697930373b5436c53bbfa2db143d8f59aaa6e4f853fc836f65",
+  "embedded_payload_sha256_recomputed": "735c5e5dbb42b9697930373b5436c53bbfa2db143d8f59aaa6e4f853fc836f65",
+  "hash_contract": "SHA-256 of compact JSON serialization with recursively sorted object keys; matches the embedded declaration",
+  "recovery_interpretation": "The bundle's embedded record payload is byte-recoverable and its internal digest matches. The original provider response/file is absent, so this does not authenticate upstream source bytes.",
+  "classification": "PRESENT_PROVENANCE_PENDING",
+  "data_copied_into_options_lab": false,
+  "live_requests": 0
+}
