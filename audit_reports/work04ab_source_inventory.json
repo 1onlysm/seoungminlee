@@ -1,0 +1,86 @@
+{
+  "report_id": "WORK_04AB_NVDA_HISTORY_SOURCE_INVENTORY",
+  "scope": [
+    "verified WORK 04-AA repository tree and audit contracts",
+    "preserved WORK 04-R NVDA snapshot",
+    "preserved WORK 04-T strike aggregates",
+    "accessible workspace files matching NVDA/OHLC/history patterns",
+    "user upload directory",
+    "Library search metadata for NVDA OHLC/history"
+  ],
+  "candidates": [
+    {
+      "source": "WORK 04-R Nasdaq options snapshot",
+      "path": "/workspace/scratch/navi-options-work04r-live/naviopt04r-20261117T051903Z-80a05c75/snapshots/data/options/2026-11-17/NVDA/2026-11-17T05-19-47.924836Z/raw.json",
+      "sha256": "85f6660ac4a07da061f7d2eb50080dcb40ed6203618710feb017edc55ef3d5ce",
+      "instrument": "NVDA options contracts",
+      "rows": 2188,
+      "data_kind": "options chain, not underlying OHLC",
+      "date_range": "option snapshot captured 2026-11-17T05:19:47.924836Z; data.lastTrade date-only as of 2026-11-16",
+      "adjustment": "not applicable to option-chain fields",
+      "class": "PRESENT_CONTRACT_INCOMPLETE",
+      "relevance": "Includes $156.14 date-only data.lastTrade text; not synchronized spot and not OHLC history."
+    },
+    {
+      "source": "WORK 04-R normalized contracts CSV",
+      "path": "/workspace/scratch/navi-options-work04r-live/naviopt04r-20261117T051903Z-80a05c75/snapshots/data/options/2026-11-17/NVDA/2026-11-17T05-19-47.924836Z/contracts.csv",
+      "sha256": "ccff56e9d75f6c56c516312246c98984f58026c999ec3827e89f1a1e16433bd7",
+      "instrument": "NVDA options contracts",
+      "rows": 2188,
+      "data_kind": "expiration/strike Call-Put contract values",
+      "class": "PRESENT_CONTRACT_INCOMPLETE"
+    },
+    {
+      "source": "WORK 04-T strike-level aggregates",
+      "path": "/workspace/scratch/navi-options-work04t-output-v2/nvda_strike_summary.json",
+      "sha256": "77dac6ebfc6d94277781e9c14613f97de04b35236d22617dd1518feab28f96ec",
+      "instrument": "NVDA options aggregate",
+      "data_kind": "strike aggregates, not underlying OHLC",
+      "class": "PRESENT_CONTRACT_INCOMPLETE"
+    },
+    {
+      "source": "Repository historical_evidence.json",
+      "path": "options_collector/historical_evidence.json",
+      "sha256": "4d7e2826a0931df09766732f255f363073b3ba62e0c78140e91188d624975ed8",
+      "instrument": "multi-symbol options API historical summaries",
+      "data_kind": "metadata only; raw response/history absent",
+      "class": "PRESENT_CONTRACT_INCOMPLETE"
+    },
+    {
+      "source": "User-upload directory",
+      "path": "/workspace/scratch/17fa3b0cfa9e/upload",
+      "files_found": [
+        "cdi-work01s-etf-raw-44070661825.zip"
+      ],
+      "instrument": "CDI ETF evidence, unrelated to NVDA",
+      "class": "SOURCE_ABSENT"
+    },
+    {
+      "source": "Accessible Library search",
+      "path": "ChatGPT Library search metadata (no file materialized or copied)",
+      "matches": "SOXL history and unrelated NAVI previews/reports; no NVDA OHLC file identified",
+      "class": "SOURCE_ABSENT"
+    },
+    {
+      "source": "Other local historical price CSVs",
+      "path": "/workspace/scratch",
+      "matches": [
+        "Historical_prices_Emerging_Markets_ex-China_ETF_(VEXC).csv",
+        "Historical_prices_S&P_500_ETF_(VOO).csv",
+        "Historical_prices_FTSE_Europe_ETF_(VGK).csv",
+        "nikkei_stock_average_daily_en.csv",
+        "SOXL-specific artifacts"
+      ],
+      "instrument": "not NVDA common stock",
+      "class": "SOURCE_ABSENT"
+    }
+  ],
+  "decision": {
+    "eligible_nvda_ohlc_rows": 0,
+    "first_observation": null,
+    "last_observation": null,
+    "status": "NVDA_HV_HISTORY_SOURCE_ABSENT",
+    "cross_repository_data_used": false,
+    "market_data_requests": 0
+  }
+}

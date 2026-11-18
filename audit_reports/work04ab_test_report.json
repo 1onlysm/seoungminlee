@@ -1,0 +1,35 @@
+{
+  "report_id": "WORK_04AB_OFFLINE_TEST_REPORT",
+  "baseline_command": "python -m unittest discover -s tests -v",
+  "baseline_tests": 94,
+  "baseline_passed": 94,
+  "baseline_failed": 0,
+  "final_command": "python -m unittest discover -s tests -v",
+  "final_tests": 112,
+  "final_passed": 112,
+  "final_failed": 0,
+  "new_historical_volatility_tests": 18,
+  "python_compile": {
+    "command": "python -m py_compile options_collector/historical_volatility.py tests/test_historical_volatility.py",
+    "status": "PASS"
+  },
+  "generated_html_javascript_syntax": {
+    "command": "extract inline script excluding application/json payload; node --check /tmp/work04ab-dashboard-inline.js",
+    "status": "PASS",
+    "inline_script_blocks": 1
+  },
+  "offline_dashboard_build": {
+    "status": "PASS",
+    "output_html": "/workspace/scratch/navi-options-work04ab-output/nvda_options_dashboard.html",
+    "html_sha256": "4345aaaa85adf11125912baa82ca79117422376bc9c3cbfdfbbb97310127e510"
+  },
+  "browser_render": {
+    "status": "UNVERIFIED",
+    "attempt": "/usr/bin/chromium --headless --no-sandbox --disable-gpu --disable-dev-shm-usage --dump-dom file://...",
+    "exit_code": 134,
+    "environment_error": "socket() failed: Operation not permitted; ptrace: Operation not permitted"
+  },
+  "galaxy_device": "DEVICE_PENDING",
+  "live_market_requests": 0,
+  "github_actions": 0
+}

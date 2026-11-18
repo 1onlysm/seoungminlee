@@ -1,0 +1,22 @@
+{
+  "report_id": "WORK_04AB_NVDA_OHLC_QUALITY_GATE",
+  "source_candidates_reviewed": 7,
+  "candidate_nvidia_ohlc_sources": 0,
+  "eligible_nvda_observations": 0,
+  "verified_date_range": null,
+  "checks": {
+    "symbol_identity": "NO_ELIGIBLE_SERIES_TO_VALIDATE",
+    "chronology": "NO_ELIGIBLE_SERIES_TO_VALIDATE",
+    "duplicate_dates": "NO_ELIGIBLE_SERIES_TO_VALIDATE",
+    "future_observations": "NO_ELIGIBLE_SERIES_TO_VALIDATE",
+    "positive_finite_ohlc": "NO_ELIGIBLE_SERIES_TO_VALIDATE",
+    "low_open_close_high_relationship": "NO_ELIGIBLE_SERIES_TO_VALIDATE",
+    "adjustment_convention": "UNKNOWN_FOR_UNAVAILABLE_SERIES",
+    "exchange_session_calendar": "NOT_AVAILABLE",
+    "missing_sessions": "NOT_ASSESSABLE",
+    "provenance_and_reuse_rights": "NO_NVDA_OHLC_SOURCE_FOUND"
+  },
+  "options_snapshot_note": "The options response is not an OHLC dataset. data.lastTrade is a formatted, date-only historical reference and is not used as a close observation.",
+  "result": "NVDA_HV_HISTORY_SOURCE_ABSENT",
+  "production_hv_calculated": false
+}

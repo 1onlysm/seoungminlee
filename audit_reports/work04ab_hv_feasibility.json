@@ -1,0 +1,49 @@
+{
+  "report_id": "WORK_04AB_HV_FEASIBILITY",
+  "indicators": [
+    {
+      "indicator": "HV10",
+      "required_data": "11 verified NVDA closes / 10 valid returns",
+      "existing_verified_data": "0 eligible OHLC rows",
+      "missing_requirements": "NVDA OHLC source, provenance, calendar, adjustment convention",
+      "formula_status": "FORMULA_SPECIFIED",
+      "data_status": "NOT_READY",
+      "implementation_status": "GUARDED_OFFLINE_HELPER_TESTED",
+      "production_display_status": "NOT_READY",
+      "verdict": "BLOCKED_SOURCE_ABSENT"
+    },
+    {
+      "indicator": "HV20",
+      "required_data": "21 verified NVDA closes / 20 valid returns",
+      "existing_verified_data": "0 eligible OHLC rows",
+      "missing_requirements": "NVDA OHLC source, provenance, calendar, adjustment convention",
+      "formula_status": "FORMULA_SPECIFIED",
+      "data_status": "NOT_READY",
+      "implementation_status": "GUARDED_OFFLINE_HELPER_TESTED",
+      "production_display_status": "NOT_READY",
+      "verdict": "BLOCKED_SOURCE_ABSENT"
+    },
+    {
+      "indicator": "HV30",
+      "required_data": "31 verified NVDA closes / 30 valid returns",
+      "existing_verified_data": "0 eligible OHLC rows",
+      "missing_requirements": "NVDA OHLC source, provenance, calendar, adjustment convention",
+      "formula_status": "FORMULA_SPECIFIED",
+      "data_status": "NOT_READY",
+      "implementation_status": "GUARDED_OFFLINE_HELPER_TESTED",
+      "production_display_status": "NOT_READY",
+      "verdict": "BLOCKED_SOURCE_ABSENT"
+    },
+    {
+      "indicator": "HV60",
+      "required_data": "61 verified NVDA closes / 60 valid returns",
+      "existing_verified_data": "0 eligible OHLC rows",
+      "missing_requirements": "NVDA OHLC source, provenance, calendar, adjustment convention",
+      "formula_status": "FORMULA_SPECIFIED",
+      "data_status": "NOT_READY",
+      "implementation_status": "GUARDED_OFFLINE_HELPER_TESTED",
+      "production_display_status": "NOT_READY",
+      "verdict": "BLOCKED_SOURCE_ABSENT"
+    }
+  ]
+}

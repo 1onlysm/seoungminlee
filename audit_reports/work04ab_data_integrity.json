@@ -1,0 +1,50 @@
+{
+  "report_id": "WORK_04AB_DATA_INTEGRITY",
+  "source_branch": "work04aa-verified-volatility-contract",
+  "source_commit": "e21da589658fb2ef658ad7d8f63d10a75cd3ed6b",
+  "options_snapshot": {
+    "raw_path": "/workspace/scratch/navi-options-work04r-live/naviopt04r-20261117T051903Z-80a05c75/snapshots/data/options/2026-11-17/NVDA/2026-11-17T05-19-47.924836Z/raw.json",
+    "raw_sha256": "85f6660ac4a07da061f7d2eb50080dcb40ed6203618710feb017edc55ef3d5ce",
+    "expected_sha256": "85f6660ac4a07da061f7d2eb50080dcb40ed6203618710feb017edc55ef3d5ce",
+    "raw_hash_match": true,
+    "contracts": 2188,
+    "unique_strikes": 444,
+    "expirations": 24,
+    "observed_totals": {
+      "contracts": 2188,
+      "strike_count": 444,
+      "call_volume_observed_sum": 1457430,
+      "call_volume_observed_count": 1610,
+      "call_volume_missing_count": 578,
+      "put_volume_observed_sum": 953110,
+      "put_volume_observed_count": 1293,
+      "put_volume_missing_count": 895,
+      "call_oi_observed_sum": 9839124,
+      "call_oi_observed_count": 2049,
+      "call_oi_missing_count": 139,
+      "put_oi_observed_sum": 8636754,
+      "put_oi_observed_count": 1585,
+      "put_oi_missing_count": 603
+    },
+    "loader_validation_all_checks_pass": true,
+    "limitations": [
+      "EOD_UNVERIFIED",
+      "MISSINGNESS_CAUSE_UNKNOWN",
+      "FULL_VOLUME_COMPLETENESS_UNVERIFIED"
+    ]
+  },
+  "historical_ohlc": {
+    "eligible_observations": 0,
+    "verified_date_range": null,
+    "adjustment_convention": null,
+    "status": "SOURCE_ABSENT",
+    "reason": "No eligible NVDA common-stock OHLC history was found in the reference repository, preserved WORK 04-R/T/AA artifacts, or accessible workspace/upload search. The options snapshot contains only one date-only historical reference price, not a daily OHLC series."
+  },
+  "production_hv": {
+    "HV10": "UNAVAILABLE_SOURCE_ABSENT",
+    "HV20": "UNAVAILABLE_SOURCE_ABSENT",
+    "HV30": "UNAVAILABLE_SOURCE_ABSENT",
+    "HV60": "UNAVAILABLE_SOURCE_ABSENT"
+  },
+  "dashboard_changed": false
+}

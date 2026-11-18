@@ -1,0 +1,48 @@
+{
+  "contract_id": "NAVI_NVDA_HISTORICAL_VOLATILITY",
+  "version": 1,
+  "status": "FORMULA_SPECIFIED_DATA_ABSENT",
+  "symbol": "NVDA",
+  "price_series": "daily common-stock OHLC; use Close consistently; adjustment convention must be declared and consistent",
+  "return": "r_t = ln(C_t / C_(t-1))",
+  "estimator": "sample standard deviation (ddof=1) over exactly N consecutive valid close-to-close log returns",
+  "annualization": "HV_N_percent = sample_stddev(returns) * sqrt(252) * 100",
+  "annualization_factor": 252,
+  "factor_type": "conventional annualization assumption",
+  "windows_returns": [
+    10,
+    20,
+    30,
+    60
+  ],
+  "minimum_close_observations": {
+    "HV10": 11,
+    "HV20": 21,
+    "HV30": 31,
+    "HV60": 61
+  },
+  "missing_session_policy": "Reject the window unless all expected exchange sessions in that exact window are represented once; do not forward-fill, interpolate, or bridge unknown gaps. Exchange holiday calendar must be independently verified.",
+  "date_policy": "Strictly increasing unique ISO dates, no future observation relative to declared calculation date.",
+  "ohlc_quality": "All OHLC finite and positive; Low <= Open/Close <= High.",
+  "corporate_actions": "Single explicit convention across the window: RAW_UNADJUSTED, SPLIT_ADJUSTED, or SPLIT_AND_DIVIDEND_ADJUSTED. Reject UNKNOWN or inconsistent series.",
+  "minimum_sample": "N valid returns; sample SD requires N >= 2.",
+  "rounding": "Keep full floating-point result in calculation audit; UI may display two decimal places only after a verified production calculation.",
+  "calculation_date": "Latest eligible source close date, not system time.",
+  "provenance_required": [
+    "symbol/instrument confirmation",
+    "source and retrieval/preservation record",
+    "source SHA-256",
+    "currency/units",
+    "field definitions",
+    "adjustment convention",
+    "exchange session calendar",
+    "reuse authorization"
+  ],
+  "status_separation": [
+    "FORMULA_SPECIFIED",
+    "DATA_READY",
+    "IMPLEMENTATION_READY",
+    "PRODUCTION_DISPLAY_READY"
+  ],
+  "current_source_status": "No eligible NVDA OHLC dataset found; no production HV value emitted."
+}
