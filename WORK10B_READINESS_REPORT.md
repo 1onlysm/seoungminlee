@@ -78,7 +78,7 @@ Other relevant manual/diagnostic runs in the accessible window:
 | 41538214224 | SPY manual dispatch / main / `69b7c647a816c057021df0a0833635e2f2c4f85c` | 11-02 22:33 / 17:33 | failure | SPY data failed timestamp gate; HTTP status not retained | No artifact; INSUFFICIENT_EVIDENCE |
 | 41527527903 | SPY manual dispatch / main / `69b7c647a816c057021df0a0833635e2f2c4f85c` | 11-02 21:20 / 16:20 | success | Request/output status not established from saved artifacts | No artifact; INSUFFICIENT_EVIDENCE |
 
-The manual-run list above captures the market-data diagnostic/probe/offline runs. Two additional unrelated repository workflow runs in the 31-run window are outside the options pipeline.
+The 12 non-scheduled rows above account for the remaining runs in the 31-run Actions history.
 
 ### Latest real artifact inspection
 
