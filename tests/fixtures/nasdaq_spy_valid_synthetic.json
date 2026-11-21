@@ -1,0 +1,54 @@
+{
+  "fixture_type": "SYNTHETIC_TEST_FIXTURE_NOT_LIVE_NASDAQ_DATA",
+  "http_status": 200,
+  "capture_timestamp_utc": "2026-11-20T21:20:00Z",
+  "session_date_et": "2026-11-20",
+  "payload": {
+    "status": {"rCode": 200},
+    "data": {
+      "lastTrade": "LAST TRADE: $690.43 (AS OF NOV 20, 2026 4:00 PM ET)",
+      "totalRecord": 4,
+      "table": {
+        "asOf": "2026-11-20T16:15:00-05:00",
+        "rows": [
+          {"expirygroup": "November 20, 2026"},
+          {
+            "strike": "500.00",
+            "drillDownURL": "https://www.nasdaq.com/market-activity/etf/spy/option-chain/spy--261120c00500000",
+            "c_Option": "SPY  261120C00500000",
+            "p_Option": "SPY  261120P00500000",
+            "c_Volume": "10",
+            "p_Volume": "20",
+            "c_Openinterest": "100",
+            "p_Openinterest": "200",
+            "c_Bid": "1.00",
+            "c_Ask": "1.10",
+            "p_Bid": "2.00",
+            "p_Ask": "2.10",
+            "c_Last": "1.05",
+            "p_Last": "2.05",
+            "c_QuoteTime": "2026-11-20T16:14:00-05:00",
+            "p_QuoteTime": "2026-11-20T16:14:00-05:00"
+          },
+          {"expirygroup": "November 23, 2026"},
+          {
+            "strike": "505.00",
+            "drillDownURL": "https://www.nasdaq.com/market-activity/etf/spy/option-chain/spy--261123c00505000",
+            "c_Option": "SPY  261123C00505000",
+            "p_Option": "SPY  261123P00505000",
+            "c_Volume": "0",
+            "p_Volume": "5",
+            "c_Openinterest": "0",
+            "p_Openinterest": "75",
+            "c_Bid": "0.90",
+            "c_Ask": "1.00",
+            "p_Bid": "2.50",
+            "p_Ask": "2.70",
+            "c_Last": "0.95",
+            "p_Last": "2.60"
+          }
+        ]
+      }
+    }
+  }
+}
