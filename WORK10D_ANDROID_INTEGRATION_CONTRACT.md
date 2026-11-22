@@ -53,7 +53,7 @@ UTF-8 (optional UTF-8 BOM), header row with exact column names, one `schema_vers
 
 - Maximum input size: 10 MiB; maximum 100,000 contracts; maximum JSON nesting depth: 32.
 - Strict UTF-8 decoding; no archive, workbook, URL, or directory import.
-- Normalized schema remains `navi-options-chain/1.0.0`; every field retains source availability (`NOT_PROVIDED_BY_SOURCE`, `NULL`, `MISSING`, `EXPLICIT_ZERO`, `VALID_POSITIVE`, `INVALID_NEGATIVE`, `INVALID_VALUE`).
+- Normalized schema remains `navi-options-chain/1.0.0`; every field retains source availability (`NOT_PROVIDED_BY_SOURCE`, `NULL`, `MISSING`, `EXPLICIT_ZERO`, `VALID_POSITIVE`, `VALID_SIGNED` for Greeks, `INVALID_NEGATIVE`, `INVALID_VALUE`). Signed Greeks are preserved because negative delta/theta/rho values can be valid.
 - Snapshot envelope records import ID/time, source filename/type, source hash, schema versions, declared session date, source time, structural/freshness/research statuses, quality and error reports. Imported source bytes are not retained by this implementation.
 - A local import timestamp is never substituted for source capture/as-of time. When original capture time is absent, freshness is `UNVERIFIED` (if source as-of exists) or `SOURCE_TIME_UNAVAILABLE` (if it does not).
 - Error code examples: `UNSUPPORTED_FILE_FORMAT`, `FILE_SIZE_LIMIT_EXCEEDED`, `INVALID_ENCODING_UTF8_REQUIRED`, `MALFORMED_JSON`, `UNSUPPORTED_SCHEMA_VERSION`, `REQUIRED_COLUMNS_MISSING`, `REQUIRED_FIELD_MISSING`, `INVALID_EXPIRATION`, `INVALID_STRIKE`, `INVALID_CALL_PUT_SIDE`, `DUPLICATE_CONTRACT_KEY`, `MIXED_UNDERLYING_SYMBOLS_UNSUPPORTED`, `SNAPSHOT_OVERWRITE_BLOCKED`, and `INVALID_SCHEMA_VERSION`.

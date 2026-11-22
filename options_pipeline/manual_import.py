@@ -38,6 +38,7 @@ OPTIONAL_NUMERIC = (
     "volume", "open_interest", "bid", "ask", "last_price", "implied_volatility",
     "delta", "gamma", "theta", "vega", "rho", "contract_multiplier",
 )
+SIGNED_NUMERIC = ("delta", "gamma", "theta", "vega", "rho")
 ALLOWED_JSON_KEYS = {"schema_version", "source", "source_asof_timestamp", "capture_timestamp_utc", "session_date", "contracts"}
 
 
@@ -99,6 +100,8 @@ def _availability(row, field):
         number = _decimal(value)
         if number is None:
             return "INVALID_VALUE"
+        if field in SIGNED_NUMERIC:
+            return "EXPLICIT_ZERO" if number == 0 else "VALID_SIGNED"
         if number < 0:
             return "INVALID_NEGATIVE"
         return "EXPLICIT_ZERO" if number == 0 else "VALID_POSITIVE"
@@ -127,10 +130,12 @@ def _normalize_record(row, index):
     normalized = {}
     for field in FIELDS:
         availability = _availability(row, field)
+        if field == "contract_multiplier" and _decimal(row.get(field)) == 0:
+            availability = "INVALID_VALUE"
         source[field] = {"source_key": field, "availability": availability, "raw_value": row.get(field)}
         if field in OPTIONAL_NUMERIC or field == "strike":
             number = _decimal(row.get(field))
-            normalized[field] = str(number) if number is not None and number >= 0 else None
+            normalized[field] = str(number) if number is not None and (number >= 0 or field in SIGNED_NUMERIC) else None
         else:
             normalized[field] = row.get(field) if field in row else None
     option_symbol = normalized["option_symbol"]
@@ -140,11 +145,25 @@ def _normalize_record(row, index):
     root = normalized["root"]
     if root is not None:
         root = str(root).strip().upper() or None
+    identifier_status = "NOT_PROVIDED_BY_SOURCE"
+    if contract_id:
+        compact = re.sub(r"\s+", "", str(contract_id)).upper()
+        match = re.fullmatch(r"([A-Z0-9.]{1,6})(\d{6})([CP])(\d{8})", compact)
+        if match:
+            yy, mm, dd = int(match.group(2)[:2]), int(match.group(2)[2:4]), int(match.group(2)[4:6])
+            try:
+                osi_expiration = datetime(2000 + yy, mm, dd).date().isoformat()
+            except ValueError:
+                osi_expiration = None
+            osi_strike = Decimal(int(match.group(4))) / Decimal(1000)
+            identifier_status = "VALID_OSI" if osi_expiration == expiration and match.group(3) == ("C" if side == "CALL" else "P") and osi_strike == strike_number else "INVALID_OSI_MISMATCH"
+        else:
+            identifier_status = "SOURCE_PROVIDED_UNVALIDATED_FORMAT"
     return {
         "underlying_symbol": symbol,
         "original_option_symbol": option_symbol,
         "contract_identifier": contract_id,
-        "contract_identifier_status": "PROVIDED" if contract_id else "NOT_PROVIDED_BY_SOURCE",
+        "contract_identifier_status": identifier_status,
         "root": root,
         "root_class": "STANDARD" if root == symbol else "UNKNOWN" if not root else "ADJUSTED_OR_UNVERIFIED",
         "expiration": expiration,
@@ -165,11 +184,15 @@ def _normalize_record(row, index):
 
 def _check_duplicates(records):
     seen = set()
+    seen_ids = set()
     for record in records:
         key = (record["underlying_symbol"], record["root"] or "", record["expiration"], record["strike"], record["side"])
-        if key in seen:
+        identifier = record.get("contract_identifier")
+        if key in seen or (identifier and identifier in seen_ids):
             raise ImportError("DUPLICATE_CONTRACT_KEY")
         seen.add(key)
+        if identifier:
+            seen_ids.add(identifier)
 
 
 def _parse_csv(text):
@@ -344,8 +367,11 @@ def import_file(file_path, output_dir, *, import_time=None):
     if expired:
         structural_issues.append("EXPIRED_CONTRACT_PRESENT")
     optional_invalid = sum(1 for record in records for field in OPTIONAL_NUMERIC if record["source_field_availability"][field]["availability"] in ("INVALID_NEGATIVE", "INVALID_VALUE"))
+    invalid_identifiers = sum(record["contract_identifier_status"] == "INVALID_OSI_MISMATCH" for record in records)
     if optional_invalid:
         structural_issues.append("INVALID_OPTIONAL_NUMERIC_VALUES")
+    if invalid_identifiers:
+        structural_issues.append("INVALID_CONTRACT_IDENTIFIER")
     by_side = {side: [record for record in records if record["side"] == side] for side in ("CALL", "PUT")}
     if not by_side["CALL"] or not by_side["PUT"]:
         structural_issues.append("CALL_OR_PUT_SIDE_MISSING")
@@ -357,9 +383,12 @@ def import_file(file_path, output_dir, *, import_time=None):
         coverage_pct = round(100 * present / len(records), 4)
         field_coverage[field] = {"valid_count": present, "eligible_count": len(records), "coverage_percentage": coverage_pct,
                                  "missing_percentage": round(100 - coverage_pct, 4)}
-    quality_status = "BLOCKED" if structural == "INVALID" else "PROVISIONAL_AVAILABLE" if all(by_side.values()) else "LIMITED"
-    if freshness["status"] in ("SOURCE_TIME_UNAVAILABLE", "UNVERIFIED", "STALE", "RECENT_NOT_CURRENT") or any(field_coverage[f]["coverage_percentage"] < 100 for f in ("volume", "open_interest")) or missing_required_source:
-        quality_status = "LIMITED" if structural != "INVALID" else "BLOCKED"
+    quality_status = "BLOCKED" if structural == "INVALID" else "LIMITED"
+    if structural != "INVALID" and all(by_side.values()) and all(field_coverage[f]["coverage_percentage"] == 100 for f in ("volume", "open_interest")) and not missing_required_source:
+        # Research usability is intentionally independent of freshness. A fully
+        # populated user file may be inspected provisionally while freshness
+        # remains UNVERIFIED in its own axis.
+        quality_status = "PROVISIONAL_AVAILABLE"
 
     metadata = {
         "provider": str(envelope.get("source") or source_type),
@@ -403,7 +432,7 @@ def import_file(file_path, output_dir, *, import_time=None):
         "import_field_coverage": field_coverage,
         "analytics_provenance": "USER_SUPPLIED_OFFLINE_FILE; NOT VERIFIED MARKET COVERAGE",
     })
-    analytics = _analytics(records, field_coverage, structural, quality_status)
+    analytics = _analytics(records, field_coverage, structural, quality_status, freshness["status"])
     quality["provisional_analytics"] = analytics
     try:
         directory = write_snapshot(output_dir, metadata, records, quality,
@@ -427,7 +456,7 @@ def read_import_snapshot(snapshot_path):
     return {"manifest": manifest, **values}
 
 
-def _analytics(records, coverage, structural, usability):
+def _analytics(records, coverage, structural, usability, freshness_status):
     """Observed-only calculations. Missing values remain in denominators/warnings."""
     totals = {}
     for field in ("volume", "open_interest"):
@@ -460,34 +489,46 @@ def _analytics(records, coverage, structural, usability):
             by_expiration[exp_key] = str(Decimal(by_expiration.get(exp_key, "0")) + Decimal(value))
         concentration[field] = {"by_side_and_strike": by_strike, "by_side_and_expiration": by_expiration,
                                 "status": "PROVISIONAL_OBSERVED_CONCENTRATION", "coverage": coverage[field]}
-    complete_oi = all(totals["open_interest"][side]["eligible_count"] > 0 and totals["open_interest"][side]["coverage_percentage"] == 100 for side in ("CALL", "PUT"))
-    multipliers = {row.get("contract_multiplier") for row in records}
-    max_pain = {"status": "BLOCKED", "value": None}
-    if structural == "INVALID":
-        max_pain["reason"] = "STRUCTURAL_QUALITY_INVALID"
-    elif not complete_oi:
-        max_pain["reason"] = "OPEN_INTEREST_INPUT_INCOMPLETE"
-    elif any(value is None for value in multipliers) or len(multipliers) != 1:
-        max_pain["reason"] = "CONTRACT_MULTIPLIER_UNAVAILABLE_OR_INCONSISTENT"
-    else:
-        candidates = sorted({Decimal(row["strike"]) for row in records})
-        multiplier = Decimal(next(iter(multipliers)))
-        payouts = {}
-        for settlement in candidates:
-            payout = Decimal(0)
-            for row in records:
-                strike, oi = Decimal(row["strike"]), Decimal(row["open_interest"])
-                if row["side"] == "CALL" and settlement > strike:
-                    payout += (settlement - strike) * oi * multiplier
-                elif row["side"] == "PUT" and settlement < strike:
-                    payout += (strike - settlement) * oi * multiplier
-            payouts[str(settlement)] = str(payout)
-        min_payout = min(Decimal(v) for v in payouts.values())
-        max_pain = {"status": "PROVISIONAL", "value": str(min(Decimal(k) for k, v in payouts.items() if Decimal(v) == min_payout)),
-                    "reason": "COMPLETE_OBSERVED_OI_AND_EXPLICIT_MULTIPLIER", "payout_by_settlement": payouts}
+    expirations = sorted({row["expiration"] for row in records})
+    max_pain_by_expiration = {}
+    for expiration in expirations:
+        group = [row for row in records if row["expiration"] == expiration]
+        sides_present = {row["side"] for row in group} == {"CALL", "PUT"}
+        oi_complete = all(row.get("open_interest") is not None and row["source_field_availability"]["open_interest"]["availability"] in ("EXPLICIT_ZERO", "VALID_POSITIVE") for row in group)
+        multiplier_values = {row.get("contract_multiplier") for row in group}
+        multiplier_ok = len(multiplier_values) == 1 and None not in multiplier_values and Decimal(next(iter(multiplier_values))) > 0
+        if structural == "INVALID":
+            max_pain_by_expiration[expiration] = {"status": "BLOCKED", "value": None, "reason": "STRUCTURAL_QUALITY_INVALID"}
+        elif not sides_present:
+            max_pain_by_expiration[expiration] = {"status": "BLOCKED", "value": None, "reason": "CALL_OR_PUT_SIDE_MISSING_FOR_EXPIRATION"}
+        elif not oi_complete:
+            max_pain_by_expiration[expiration] = {"status": "BLOCKED", "value": None, "reason": "OPEN_INTEREST_INPUT_INCOMPLETE"}
+        elif not multiplier_ok:
+            max_pain_by_expiration[expiration] = {"status": "BLOCKED", "value": None, "reason": "CONTRACT_MULTIPLIER_UNAVAILABLE_OR_INCONSISTENT"}
+        else:
+            candidates = sorted({Decimal(row["strike"]) for row in group})
+            multiplier = Decimal(next(iter(multiplier_values)))
+            payouts = {}
+            for settlement in candidates:
+                payout = Decimal(0)
+                for row in group:
+                    strike, oi = Decimal(row["strike"]), Decimal(row["open_interest"])
+                    if row["side"] == "CALL" and settlement > strike:
+                        payout += (settlement - strike) * oi * multiplier
+                    elif row["side"] == "PUT" and settlement < strike:
+                        payout += (strike - settlement) * oi * multiplier
+                payouts[str(settlement)] = str(payout)
+            min_payout = min(Decimal(v) for v in payouts.values())
+            max_pain_by_expiration[expiration] = {"status": "PROVISIONAL", "value": str(min(Decimal(k) for k, v in payouts.items() if Decimal(v) == min_payout)),
+                                                 "reason": "COMPLETE_OBSERVED_OI_AND_EXPLICIT_MULTIPLIER", "payout_by_settlement": payouts}
+    max_pain = {"status": "PROVISIONAL" if max_pain_by_expiration and all(v["status"] == "PROVISIONAL" for v in max_pain_by_expiration.values()) else "BLOCKED",
+                "value": {expiry: result.get("value") for expiry, result in max_pain_by_expiration.items()} if max_pain_by_expiration and all(v["status"] == "PROVISIONAL" for v in max_pain_by_expiration.values()) else None,
+                "reason": "PER_EXPIRATION_PROVISIONAL_RESULTS" if max_pain_by_expiration and all(v["status"] == "PROVISIONAL" for v in max_pain_by_expiration.values()) else "ONE_OR_MORE_EXPIRATIONS_FAILED_INPUT_GATES",
+                "by_expiration": max_pain_by_expiration}
     return {"status": "PROVISIONAL_ONLY", "put_call_ratios": ratios, "observed_totals": totals,
             "concentration": concentration, "max_pain": max_pain,
             "iv_greeks": {"status": "SOURCE_VALUES_ONLY", "calculated": False,
                           "fields": {name: sum(row.get(name) is not None for row in records) for name in ("implied_volatility", "delta", "gamma", "theta", "vega", "rho")}},
-            "warnings": ["USER_SUPPLIED_FILE_NOT_INDEPENDENTLY_VERIFIED", "NO_COMPLETE_MARKET_COVERAGE_CLAIM", f"RESEARCH_USABILITY_{usability}"]}
+            "warnings": ["USER_SUPPLIED_FILE_NOT_INDEPENDENTLY_VERIFIED", "NO_COMPLETE_MARKET_COVERAGE_CLAIM",
+                         f"FRESHNESS_{freshness_status}", f"RESEARCH_USABILITY_{usability}"]}
 

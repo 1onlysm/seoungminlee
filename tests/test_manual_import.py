@@ -238,7 +238,7 @@ class ManualImportTests(unittest.TestCase):
         self.write_json(envelope(contracts=contracts))
         result = self.run_import()
         self.assertEqual(result["analytics"]["max_pain"]["status"], "BLOCKED")
-        self.assertEqual(result["analytics"]["max_pain"]["reason"], "CONTRACT_MULTIPLIER_UNAVAILABLE_OR_INCONSISTENT")
+        self.assertEqual(result["analytics"]["max_pain"]["by_expiration"]["2027-01-15"]["reason"], "CONTRACT_MULTIPLIER_UNAVAILABLE_OR_INCONSISTENT")
 
     def test_29_malformed_source_asof_timestamp_rejected(self):
         self.write_json(envelope(source_asof_timestamp="yesterday"))
@@ -249,6 +249,7 @@ class ManualImportTests(unittest.TestCase):
         value = envelope()
         for row in value["contracts"]:
             row["expiration"] = "2026-11-20"
+            row.pop("option_symbol", None)
         self.write_json(value)
         result = self.run_import()
         self.assertEqual(result["structural_quality"], "VALID")
