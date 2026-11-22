@@ -15,6 +15,7 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 
 from . import SCHEMA_VERSION
+from .analytics import analyze_options
 from .contract import PayloadError, parse_nasdaq_payload
 from .freshness import classify_freshness
 from .market_calendar import is_trading_day
@@ -231,6 +232,41 @@ def _parse_json(text):
     except json.JSONDecodeError as exc:
         raise ImportError("MALFORMED_JSON") from exc
     _depth(envelope)
+    # Documented Nasdaq Cloud Data Service options-chain response adapter.
+    # This is file parsing only; it does not authenticate, request, or prove entitlement.
+    cloud_rows = envelope if isinstance(envelope, list) else envelope.get("data") if isinstance(envelope, dict) else None
+    if isinstance(cloud_rows, list):
+        if not cloud_rows:
+            raise ImportError("NASDAQ_CLOUD_CHAIN_EMPTY")
+        allowed = {"identifier", "symbol", "expiration", "strikePrice", "optionType", "lastPrice",
+                   "volume", "askPrice", "askSize", "bidPrice", "bidSize", "openInterest"}
+        rows = []
+        for index, item in enumerate(cloud_rows):
+            if not isinstance(item, dict):
+                raise ImportError(f"NASDAQ_CLOUD_ROW_NOT_OBJECT:{index}")
+            extra = set(item) - allowed
+            if extra:
+                raise ImportError(f"NASDAQ_CLOUD_UNSUPPORTED_FIELDS:{index}:{','.join(sorted(extra))}")
+            required = {"symbol", "expiration", "strikePrice", "optionType"}
+            if not required.issubset(item):
+                raise ImportError(f"NASDAQ_CLOUD_REQUIRED_FIELDS_MISSING:{index}:{','.join(sorted(required - set(item)))}")
+            side = {"C": "CALL", "CALL": "CALL", "P": "PUT", "PUT": "PUT"}.get(str(item["optionType"]).strip().upper())
+            if side is None:
+                raise ImportError(f"NASDAQ_CLOUD_INVALID_OPTION_TYPE:{index}")
+            normalized = {
+                "underlying_symbol": item["symbol"], "expiration": item["expiration"],
+                "strike": item["strikePrice"], "side": side,
+            }
+            field_map = {"identifier": ("option_symbol", "contract_identifier"), "volume": ("volume",),
+                         "openInterest": ("open_interest",), "bidPrice": ("bid",),
+                         "askPrice": ("ask",), "lastPrice": ("last_price",)}
+            for source_key, target_keys in field_map.items():
+                if source_key in item:
+                    for target_key in target_keys:
+                        normalized[target_key] = item[source_key]
+            rows.append(normalized)
+        return rows, {"source": "USER_SUPPLIED_NASDAQ_CLOUD_DATA_SERVICE", "source_asof_timestamp": None,
+                      "capture_timestamp_utc": None, "session_date": None}, "NASDAQ_CLOUD_JSON"
     if not isinstance(envelope, dict):
         raise ImportError("JSON_ROOT_NOT_OBJECT")
     # Explicit adapter for a saved Nasdaq option-chain payload. This parses bytes
@@ -286,7 +322,7 @@ def _parse_json(text):
     return contracts, envelope, "JSON"
 
 
-def import_file(file_path, output_dir, *, import_time=None):
+def import_file(file_path, output_dir, *, import_time=None, strike_range=None):
     """Validate and persist one CSV/JSON file. Returns a verified snapshot summary."""
     path = Path(file_path)
     if path.is_symlink() or not path.is_file():
@@ -392,7 +428,8 @@ def import_file(file_path, output_dir, *, import_time=None):
 
     metadata = {
         "provider": str(envelope.get("source") or source_type),
-        "endpoint_identifier": "USER_SUPPLIED_FILE" if source_type != "NASDAQ_JSON" else "NASDAQ_SAVED_OPTION_CHAIN_JSON",
+        "endpoint_identifier": ("NASDAQ_CLOUD_DATA_SERVICE_OPTIONS_CHAIN_FILE" if source_type == "NASDAQ_CLOUD_JSON"
+                                else "USER_SUPPLIED_FILE" if source_type != "NASDAQ_JSON" else "NASDAQ_SAVED_OPTION_CHAIN_JSON"),
         "requested_symbol": next(iter(symbols)),
         "capture_timestamp_utc": source_capture_dt.astimezone(timezone.utc).isoformat().replace("+00:00", "Z") if source_capture_dt else None,
         "capture_timestamp_et": source_capture_dt.astimezone(ET).isoformat() if source_capture_dt else None,
@@ -400,7 +437,8 @@ def import_file(file_path, output_dir, *, import_time=None):
         "import_timestamp_et": imported_et,
         "us_trading_session_date": session,
         "provider_asof_timestamp": source_asof,
-        "source_schema_version": IMPORT_SCHEMA_VERSION if source_type != "NASDAQ_JSON" else "NASDAQ_PAYLOAD_SCHEMA_UNDECLARED_OR_PROVIDER",
+        "source_schema_version": ("NASDAQ_CLOUD_CHAIN_API_RESPONSE" if source_type == "NASDAQ_CLOUD_JSON"
+                                  else IMPORT_SCHEMA_VERSION if source_type != "NASDAQ_JSON" else "NASDAQ_PAYLOAD_SCHEMA_UNDECLARED_OR_PROVIDER"),
         "normalization_schema_version": SCHEMA_VERSION,
         "raw_payload_sha256": hashlib.sha256(payload).hexdigest(),
         "http_status": None,
@@ -432,7 +470,8 @@ def import_file(file_path, output_dir, *, import_time=None):
         "import_field_coverage": field_coverage,
         "analytics_provenance": "USER_SUPPLIED_OFFLINE_FILE; NOT VERIFIED MARKET COVERAGE",
     })
-    analytics = _analytics(records, field_coverage, structural, quality_status, freshness["status"])
+    analytics = _analytics(records, field_coverage, structural, quality_status, freshness["status"],
+                           session if session != "unknown-session" else None, strike_range)
     quality["provisional_analytics"] = analytics
     try:
         directory = write_snapshot(output_dir, metadata, records, quality,
@@ -456,79 +495,10 @@ def read_import_snapshot(snapshot_path):
     return {"manifest": manifest, **values}
 
 
-def _analytics(records, coverage, structural, usability, freshness_status):
-    """Observed-only calculations. Missing values remain in denominators/warnings."""
-    totals = {}
-    for field in ("volume", "open_interest"):
-        totals[field] = {}
-        for side in ("CALL", "PUT"):
-            eligible = [row for row in records if row["side"] == side]
-            values = [Decimal(row[field]) for row in eligible if row.get(field) is not None and row["source_field_availability"][field]["availability"] in ("EXPLICIT_ZERO", "VALID_POSITIVE")]
-            coverage_pct = round(100 * len(values) / len(eligible), 4) if eligible else 0.0
-            totals[field][side] = {"observed_total": str(sum(values, Decimal(0))), "valid_count": len(values), "eligible_count": len(eligible),
-                                   "coverage_percentage": coverage_pct, "missing_percentage": round(100 - coverage_pct, 4) if eligible else 100.0}
-    ratios = {}
-    for field, name in (("volume", "observed_volume_pcr"), ("open_interest", "observed_oi_pcr")):
-        call = Decimal(totals[field]["CALL"]["observed_total"])
-        put = Decimal(totals[field]["PUT"]["observed_total"])
-        ratios[name] = {"value": str(put / call) if call > 0 else None,
-                        "status": "PROVISIONAL" if call > 0 and totals[field]["CALL"]["eligible_count"] and totals[field]["PUT"]["eligible_count"] else "BLOCKED",
-                        "reason": "OBSERVED_VALUES_ONLY" if call > 0 else "CALL_OBSERVED_TOTAL_ZERO_OR_SIDE_MISSING",
-                        "coverage": {side: {"coverage_percentage": totals[field][side]["coverage_percentage"],
-                                             "missing_percentage": totals[field][side]["missing_percentage"]} for side in ("CALL", "PUT")}}
-    concentration = {}
-    for field in ("volume", "open_interest"):
-        by_strike, by_expiration = {}, {}
-        for row in records:
-            value = row.get(field)
-            if value is None or row["source_field_availability"][field]["availability"] not in ("EXPLICIT_ZERO", "VALID_POSITIVE"):
-                continue
-            key = f"{row['side']}:{row['strike']}"
-            exp_key = f"{row['side']}:{row['expiration']}"
-            by_strike[key] = str(Decimal(by_strike.get(key, "0")) + Decimal(value))
-            by_expiration[exp_key] = str(Decimal(by_expiration.get(exp_key, "0")) + Decimal(value))
-        concentration[field] = {"by_side_and_strike": by_strike, "by_side_and_expiration": by_expiration,
-                                "status": "PROVISIONAL_OBSERVED_CONCENTRATION", "coverage": coverage[field]}
-    expirations = sorted({row["expiration"] for row in records})
-    max_pain_by_expiration = {}
-    for expiration in expirations:
-        group = [row for row in records if row["expiration"] == expiration]
-        sides_present = {row["side"] for row in group} == {"CALL", "PUT"}
-        oi_complete = all(row.get("open_interest") is not None and row["source_field_availability"]["open_interest"]["availability"] in ("EXPLICIT_ZERO", "VALID_POSITIVE") for row in group)
-        multiplier_values = {row.get("contract_multiplier") for row in group}
-        multiplier_ok = len(multiplier_values) == 1 and None not in multiplier_values and Decimal(next(iter(multiplier_values))) > 0
-        if structural == "INVALID":
-            max_pain_by_expiration[expiration] = {"status": "BLOCKED", "value": None, "reason": "STRUCTURAL_QUALITY_INVALID"}
-        elif not sides_present:
-            max_pain_by_expiration[expiration] = {"status": "BLOCKED", "value": None, "reason": "CALL_OR_PUT_SIDE_MISSING_FOR_EXPIRATION"}
-        elif not oi_complete:
-            max_pain_by_expiration[expiration] = {"status": "BLOCKED", "value": None, "reason": "OPEN_INTEREST_INPUT_INCOMPLETE"}
-        elif not multiplier_ok:
-            max_pain_by_expiration[expiration] = {"status": "BLOCKED", "value": None, "reason": "CONTRACT_MULTIPLIER_UNAVAILABLE_OR_INCONSISTENT"}
-        else:
-            candidates = sorted({Decimal(row["strike"]) for row in group})
-            multiplier = Decimal(next(iter(multiplier_values)))
-            payouts = {}
-            for settlement in candidates:
-                payout = Decimal(0)
-                for row in group:
-                    strike, oi = Decimal(row["strike"]), Decimal(row["open_interest"])
-                    if row["side"] == "CALL" and settlement > strike:
-                        payout += (settlement - strike) * oi * multiplier
-                    elif row["side"] == "PUT" and settlement < strike:
-                        payout += (strike - settlement) * oi * multiplier
-                payouts[str(settlement)] = str(payout)
-            min_payout = min(Decimal(v) for v in payouts.values())
-            max_pain_by_expiration[expiration] = {"status": "PROVISIONAL", "value": str(min(Decimal(k) for k, v in payouts.items() if Decimal(v) == min_payout)),
-                                                 "reason": "COMPLETE_OBSERVED_OI_AND_EXPLICIT_MULTIPLIER", "payout_by_settlement": payouts}
-    max_pain = {"status": "PROVISIONAL" if max_pain_by_expiration and all(v["status"] == "PROVISIONAL" for v in max_pain_by_expiration.values()) else "BLOCKED",
-                "value": {expiry: result.get("value") for expiry, result in max_pain_by_expiration.items()} if max_pain_by_expiration and all(v["status"] == "PROVISIONAL" for v in max_pain_by_expiration.values()) else None,
-                "reason": "PER_EXPIRATION_PROVISIONAL_RESULTS" if max_pain_by_expiration and all(v["status"] == "PROVISIONAL" for v in max_pain_by_expiration.values()) else "ONE_OR_MORE_EXPIRATIONS_FAILED_INPUT_GATES",
-                "by_expiration": max_pain_by_expiration}
-    return {"status": "PROVISIONAL_ONLY", "put_call_ratios": ratios, "observed_totals": totals,
-            "concentration": concentration, "max_pain": max_pain,
-            "iv_greeks": {"status": "SOURCE_VALUES_ONLY", "calculated": False,
-                          "fields": {name: sum(row.get(name) is not None for row in records) for name in ("implied_volatility", "delta", "gamma", "theta", "vega", "rho")}},
-            "warnings": ["USER_SUPPLIED_FILE_NOT_INDEPENDENTLY_VERIFIED", "NO_COMPLETE_MARKET_COVERAGE_CLAIM",
-                         f"FRESHNESS_{freshness_status}", f"RESEARCH_USABILITY_{usability}"]}
+def _analytics(records, coverage, structural, usability, freshness_status, session_date=None, strike_range=None):
+    """Compatibility wrapper around the versioned observed-only analytics."""
+    return analyze_options(records, coverage, structural, usability, freshness_status,
+                           session_date=session_date, provenance_status="UNVERIFIED",
+                           strike_range=strike_range)
+
 

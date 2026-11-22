@@ -10,6 +10,7 @@ from options_pipeline.manual_import import (
     IMPORT_SCHEMA_VERSION, MAX_FILE_BYTES, ImportError, import_file,
     read_import_snapshot,
 )
+from options_pipeline.analytics import compare_snapshots
 from tests.test_options_pipeline import envelope as nasdaq_fixture_envelope
 
 
@@ -228,7 +229,8 @@ class ManualImportTests(unittest.TestCase):
         result = self.run_import()
         analytics = result["analytics"]
         self.assertEqual(analytics["put_call_ratios"]["observed_volume_pcr"]["value"], "2.333333333333333333333333333")
-        self.assertEqual(analytics["max_pain"]["status"], "PROVISIONAL")
+        self.assertEqual(analytics["max_pain"]["status"], "BLOCKED")
+        self.assertEqual(analytics["max_pain"]["by_expiration"]["2027-01-15"]["reason"], "INSUFFICIENT_STRIKE_UNIVERSE")
         self.assertTrue(analytics["warnings"])
 
     def test_28_max_pain_blocked_without_contract_multiplier(self):
@@ -254,6 +256,109 @@ class ManualImportTests(unittest.TestCase):
         result = self.run_import()
         self.assertEqual(result["structural_quality"], "VALID")
 
+    def test_31_expiration_specific_pcr_and_coverage(self):
+        self.write_json(envelope())
+        analytics = self.run_import()["analytics"]
+        jan = analytics["expiration_analytics"]["2027-01-15"]
+        feb = analytics["expiration_analytics"]["2027-02-19"]
+        self.assertEqual(jan["put_call_ratios"]["volume"]["value"], "2")
+        self.assertEqual(jan["put_call_ratios"]["open_interest"]["value"], "2")
+        self.assertEqual(feb["put_call_ratios"]["volume"]["value"], "3")
+        self.assertEqual(jan["put_call_ratios"]["volume"]["coverage"]["CALL"]["valid_count"], 1)
+
+    def test_32_selected_strike_range_pcr(self):
+        self.write_json(envelope())
+        result = import_file(self.source, self.output, import_time=datetime(2026, 11, 21, tzinfo=timezone.utc),
+                             strike_range=("510", "510"))
+        pcr = result["analytics"]["put_call_ratios"]["selected_strike_range_volume_pcr"]
+        self.assertEqual(pcr["value"], "3")
+        self.assertEqual(pcr["strike_range"], {"min": "510", "max": "510"})
+
+    def test_33_walls_and_top_volume_are_candidates_with_observed_coverage(self):
+        self.write_json(envelope())
+        analytics = self.run_import()["analytics"]
+        self.assertEqual(analytics["call_wall_candidates"]["label"], "CALL_WALL_CANDIDATE")
+        self.assertEqual(analytics["call_wall_candidates"]["items"][0]["strike"], "500")
+        self.assertEqual(analytics["put_wall_candidates"]["label"], "PUT_WALL_CANDIDATE")
+        self.assertEqual(analytics["put_wall_candidates"]["items"][0]["strike"], "500")
+        self.assertEqual(analytics["volume_concentration"]["interpretation"], "OBSERVED_VOLUME_ONLY_NOT_DIRECTIONAL")
+
+    def test_34_metric_state_never_claims_verified_input_for_manual_file(self):
+        self.write_json(envelope())
+        analytics = self.run_import()["analytics"]
+        self.assertEqual(analytics["metric_quality"]["source_provenance"], "UNVERIFIED")
+        self.assertEqual(analytics["put_call_ratios"]["observed_volume_pcr"]["quality_state"], "PROVISIONAL")
+
+    def test_35_max_pain_blocks_incomplete_oi_and_single_strike_expiry(self):
+        rows = envelope()["contracts"]
+        rows[0]["open_interest"] = None
+        self.write_json(envelope(contracts=rows))
+        analytics = self.run_import()["analytics"]
+        self.assertEqual(analytics["max_pain"]["by_expiration"]["2027-01-15"]["status"], "BLOCKED")
+        self.assertEqual(analytics["max_pain"]["by_expiration"]["2027-01-15"]["reason"], "OPEN_INTEREST_INPUT_INCOMPLETE_OR_INVALID")
+
+    def test_36_history_comparison_requires_retention_and_compatible_sources(self):
+        self.write_json(envelope(source_asof_timestamp="2026-11-20T16:15:00-05:00"))
+        older = read_import_snapshot(self.run_import()["snapshot_path"])
+        with self.assertRaisesRegex(ImportError, "SNAPSHOT_OVERWRITE_BLOCKED"):
+            self.run_import()
+        # A second independent snapshot with the same explicit source timestamp is needed for comparison.
+        self.source = self.root / "second.json"
+        self.write_json(envelope(source_asof_timestamp="2026-11-20T16:15:00-05:00", capture_timestamp_utc="2026-11-21T21:16:00Z"))
+        newer = read_import_snapshot(import_file(self.source, self.output, import_time=datetime(2026, 11, 22, tzinfo=timezone.utc))["snapshot_path"])
+        blocked = compare_snapshots(older, newer)
+        self.assertEqual(blocked["status"], "BLOCKED")
+        self.assertIn("RETENTION_PERMISSION_UNVERIFIED", blocked["reason"])
+        allowed = compare_snapshots(older, newer, retention_permitted=True)
+        self.assertEqual(allowed["status"], "PROVISIONAL")
+        self.assertEqual(len(allowed["contracts"]), 4)
+        self.assertEqual(allowed["pcr_change"]["status"], "PROVISIONAL")
+
+    def test_37_documented_nasdaq_cloud_chain_file_adapter_and_oracle(self):
+        fixture = Path(__file__).parent / "fixtures" / "nasdaq_cloud_options_chain_TEST_ONLY.json"
+        self.source = self.root / fixture.name
+        self.source.write_bytes(fixture.read_bytes())
+        result = self.run_import()
+        self.assertEqual(result["record_count"], 4)
+        self.assertEqual(result["symbol"], "SPY")
+        self.assertEqual(result["analytics"]["observed_totals"]["volume"]["CALL"]["observed_total"], "10")
+        self.assertEqual(result["analytics"]["observed_totals"]["volume"]["PUT"]["observed_total"], "25")
+        self.assertEqual(result["analytics"]["observed_totals"]["open_interest"]["CALL"]["observed_total"], "100")
+        self.assertEqual(result["analytics"]["observed_totals"]["open_interest"]["PUT"]["observed_total"], "275")
+        self.assertEqual(result["analytics"]["put_call_ratios"]["observed_volume_pcr"]["value"], "2.5")
+        self.assertEqual(result["analytics"]["put_call_ratios"]["observed_oi_pcr"]["value"], "2.75")
+        self.assertEqual(result["analytics"]["max_pain"]["status"], "BLOCKED")
+        self.assertEqual(result["analytics"]["max_pain"]["by_expiration"]["2027-01-15"]["reason"], "SESSION_DATE_UNAVAILABLE")
+        self.assertEqual(result["freshness"]["status"], "SOURCE_TIME_UNAVAILABLE")
+
+    def test_38_cloud_adapter_preserves_absent_vs_null_and_rejects_schema_drift(self):
+        value = json.loads((Path(__file__).parent / "fixtures" / "nasdaq_cloud_options_chain_TEST_ONLY.json").read_text())
+        value[0].pop("volume")
+        value[1]["volume"] = None
+        self.source.write_text(json.dumps(value), encoding="utf-8")
+        result = self.run_import()
+        rows = read_import_snapshot(result["snapshot_path"])["records"]
+        self.assertEqual(rows[0]["volume_source_status"], "NOT_PROVIDED_BY_SOURCE")
+        self.assertEqual(rows[1]["volume_source_status"], "NULL")
+        value[0]["surprise"] = 9
+        self.source.write_text(json.dumps(value), encoding="utf-8")
+        with self.assertRaisesRegex(ImportError, "NASDAQ_CLOUD_UNSUPPORTED_FIELDS"):
+            import_file(self.source, self.root / "other-snapshots", import_time=datetime(2026, 11, 21, tzinfo=timezone.utc))
+
+    def test_39_max_pain_only_runs_with_two_strikes_per_expiration_and_explicit_multiplier(self):
+        rows = [
+            {"underlying_symbol":"SPY","expiration":"2027-01-15","strike":"500","side":"CALL","volume":"1","open_interest":"100","contract_multiplier":"100"},
+            {"underlying_symbol":"SPY","expiration":"2027-01-15","strike":"500","side":"PUT","volume":"1","open_interest":"100","contract_multiplier":"100"},
+            {"underlying_symbol":"SPY","expiration":"2027-01-15","strike":"510","side":"CALL","volume":"1","open_interest":"50","contract_multiplier":"100"},
+            {"underlying_symbol":"SPY","expiration":"2027-01-15","strike":"510","side":"PUT","volume":"1","open_interest":"200","contract_multiplier":"100"},
+        ]
+        self.write_json(envelope(contracts=rows))
+        result = self.run_import()
+        max_pain = result["analytics"]["max_pain"]["by_expiration"]["2027-01-15"]
+        self.assertEqual(max_pain["status"], "PROVISIONAL")
+        self.assertEqual(max_pain["value"], "510")
+
 
 if __name__ == "__main__":
     unittest.main()
+
